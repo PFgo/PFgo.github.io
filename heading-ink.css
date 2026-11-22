@@ -1,0 +1,25 @@
+@media (prefers-reduced-motion: no-preference) {
+  .ink-prepared .ink-word { position: relative; display: inline-block; }
+  .ink-prepared .ink-word:not(.ink-written) { color: transparent; }
+  .ink-word canvas {
+    position: absolute;
+    left: -.08em;
+    top: -.35em;
+    pointer-events: none;
+  }
+  .ink-written canvas { display: none; }
+  [data-ink-arrived="playing"] :is(.market-copy p, .notebook, .harbor-contact .contact-links) {
+    animation: street-note-arrives .48s ease-out .14s backwards;
+  }
+  [data-ink-arrived="playing"] :is(.market-loaves, .resume-note) {
+    animation: street-note-arrives .48s ease-out .23s backwards;
+  }
+  @keyframes street-note-arrives {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-word canvas { display: none; }
+}

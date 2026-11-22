@@ -1,0 +1,113 @@
+.drumheller-water { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .drumheller-water {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+    left: 69.5714286%;
+    top: 53.7292818%;
+    width: 4.6666667%;
+    height: 35.9116022%;
+    overflow: hidden;
+    contain: paint;
+  }
+  /* The original painting contains the still fountain. Decode its moving
+     water only on approach, and slide one isolated atlas through the window. */
+  .drumheller-water[data-water-ready]::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 800%;
+    height: 600%;
+    background: url("assets/fountain-water-atlas.webp") 0 0 / 100% 100% no-repeat;
+    animation: fountain-columns 400ms steps(8, end) infinite,
+               fountain-rows 2400ms steps(6, end) infinite;
+  }
+  .city-stage[data-street-paused] .drumheller-water::before,
+  .drumheller-water[data-out-of-view]::before {
+    animation-play-state: paused;
+  }
+}
+@keyframes fountain-columns {
+  from { translate: 0 0; }
+  to { translate: -100% 0; }
+}
+@keyframes fountain-rows {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+.street-tree {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+.cherry-fall { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  /* The original painted crown bends at the trunk seam. Its transform fixes
+     that horizontal line, keeping the tree grounded throughout the cycle. */
+  .street-tree[data-wind-ready] .wind-canopy {
+    transform-box: view-box;
+    transform-origin: 60% 77%;
+    animation: painted-canopy-breeze 14s ease-in-out -2s infinite;
+  }
+  .street-tree[data-wind-ready] .cherry-fall { display: inline; }
+  .city-stage[data-street-paused] .wind-canopy,
+  .street-tree[data-out-of-view] .wind-canopy,
+  .city-stage :is(.campus-conversation, .harbor-air, .street-lane svg)[data-out-of-view] * {
+    animation-play-state: paused;
+  }
+  /* Only a person's footprint travels. Their viewBox need not ride on a
+     composited layer as wide as the full, four-block panorama. */
+  .city-stage .street-lane {
+    width: max-content;
+    animation-name: promenade-crossing;
+  }
+}
+@keyframes promenade-crossing {
+  from { transform: translateX(-5rem); }
+  to { transform: translateX(calc(4 * var(--block-width) + 1rem)); }
+}
+@keyframes painted-canopy-breeze {
+  0%, 100% { transform: skewX(.12deg) scaleY(1); }
+  23% { transform: skewX(-.91deg) scaleY(.998); }
+  38% { transform: skewX(-.48deg) scaleY(.999); }
+  62% { transform: skewX(.66deg) scaleY(1.002); }
+  81% { transform: skewX(.32deg) scaleY(1.001); }
+}
+@media (max-width: 700px) {
+  #cherry-young-leaf, #cherry-petal { transform: scale(1.28); }
+}
+
+.harbor-wheel {
+  position: absolute;
+  pointer-events: none;
+  left: 79.97619048%;
+  top: 7.18232044%;
+  width: 5.35714286%;
+  height: 65.60773481%;
+}
+.harbor-wheel img, .harbor-wheel canvas { display:block; width:100%; height:100%; }
+.harbor-wheel [hidden] { display:none; }
+
+/* The mast meets the painted spire at (1533, 48) in the 8400 × 724 panorama. */
+.needle-banner {
+  position: absolute;
+  left: 18.25%;
+  top: 6.63%;
+  width: clamp(118px, 12vw, 178px);
+  height: auto;
+  overflow: visible;
+  transform: translate(-1.65%, -100%);
+}
+.banner-title { font: 400 29px "Patrick Hand", "Trebuchet MS", sans-serif; }
+.banner-title.ink-left { display: none; }
+@media (max-width: 700px) {
+  /* Fly into the frame on narrow streets. Keep the lettering front-facing. */
+  .needle-banner { width: clamp(140px, 36vw, 166px); transform: translate(-98.35%, -100%); }
+  .banner-facing { transform: translateX(210px) scaleX(-1); }
+  .banner-lettering { transform: translateX(176px) scaleX(-1); }
+  .banner-title.ink-right { display: none; }
+  .banner-title.ink-left { display: inline; }
+}
+html:not([data-street-navigation-ready]) .needle-banner { width: 12%; }
