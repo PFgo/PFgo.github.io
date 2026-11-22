@@ -16,6 +16,7 @@
   });
   let offsets = [];
   let current = -1;
+  let openingHoldsGreeting = false;
   let destination = null;
   let frame = 0;
   let settleTimer = 0;
@@ -62,10 +63,7 @@
     }
   }
 
-  rail.addEventListener('street-title-written', event => finishArrival(event.target.closest('.street-stop')));
-  rail.addEventListener('animationend', event => {
-    if (event.animationName !== 'welcome-show' ||
-        !event.target.matches('.finish-friends')) return;
+  rail.addEventListener('street-title-written', event => {
     finishArrival(event.target.closest('.street-stop'));
   });
 
@@ -105,7 +103,7 @@
       // A fresh document starts with no visits. Finish the first reveal when
       // leaving so even a quick round trip returns to fully readable text.
       const ink = stop.dataset.inkArrived;
-      if (ink === undefined && distance <= .62) {
+      if (ink === undefined && distance <= .62 && !(index === 0 && openingHoldsGreeting)) {
         if (reducedMotion.matches) {
           finishArrival(stop);
         } else {
@@ -363,7 +361,11 @@
     const view = rail.getBoundingClientRect();
     const street = stage.getBoundingClientRect();
     const flag = banner.getBoundingClientRect();
-    if (!flag.width || !view.height) return;
+    if (!flag.width || !view.height) {
+      openingHoldsGreeting = false;
+      paint();
+      return;
+    }
 
     // Frame the cloth using its position in the responsive street scene.
     const narrow = matchMedia('(max-width: 700px)').matches;
@@ -379,19 +381,27 @@
     const controls = new AbortController();
     const {signal} = controls;
     // The opening is a close-up of About. A gesture takes over from that same stop.
-    function finish() {
+    function releaseGreeting() {
+      openingHoldsGreeting = false;
+      if (!frame) frame = requestAnimationFrame(paint);
+    }
+    function finish(interrupted = true) {
       if (signal.aborted) return;
       controls.abort();
       clearTimeout(deadline);
-      finishArrival(stops[0]);
+      if (interrupted) finishArrival(stops[0]);
+      releaseGreeting();
       delete root.dataset.streetOpening;
       stage.style.removeProperty('--flag-framing');
       document.dispatchEvent(new Event('street-opening-end'));
     }
     root.dataset.streetOpening = 'flag';
-    const deadline = setTimeout(finish, 2700);
+    const deadline = setTimeout(() => finish(false), 2700);
+    stops[0].addEventListener('animationstart', event => {
+      if (event.animationName === 'opening-greeting') releaseGreeting();
+    }, {signal});
     stage.addEventListener('animationend', event => {
-      if (event.target === stage && event.animationName === 'needle-pullback') finish();
+      if (event.target === stage && event.animationName === 'needle-pullback') finish(false);
     }, {signal});
     for (const type of ['wheel','touchmove','keydown','click','focusin']) {
       document.addEventListener(type, finish, {capture:true, passive:true, signal});
@@ -416,10 +426,11 @@
   document.documentElement.setAttribute('data-street-navigation-ready', '');
   measure();
   const initial = routeIndex(location.hash);
-  navigate(initial < 0 ? 0 : initial, {instant:true});
-  if (initial === 0 && ['', '#about', '#home'].includes(location.hash) &&
+  openingHoldsGreeting = initial === 0 && ['', '#about', '#home'].includes(location.hash) &&
       !reducedMotion.matches && !document.hidden &&
-      performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') playOpening();
+      performance.getEntriesByType('navigation')[0]?.type !== 'back_forward';
+  navigate(initial < 0 ? 0 : initial, {instant:true});
+  if (openingHoldsGreeting) playOpening();
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(() => resize());
     observer.observe(rail);

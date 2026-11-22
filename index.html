@@ -7,7 +7,7 @@
   <title>Dave Guo</title>
   <link rel="preload" href="assets/patrick-hand.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="home.css?v=be402c0a08">
-  <link rel="stylesheet" href="tour.css?v=0b2d5b6225">
+  <link rel="stylesheet" href="tour.css?v=26be881b17">
   <link rel="stylesheet" href="market-stop.css?v=promenade02">
   <link rel="stylesheet" href="landmarks.css?v=fa66a27968">
   <link rel="stylesheet" href="heading-ink.css?v=ae6b5b1798">
@@ -15,8 +15,8 @@
   <script defer src="street-art.js?v=5eff654228"></script>
   <script defer src="home.js?v=29ab0c82ef"></script>
   <script defer src="harbor-wheel.js?v=617650e260"></script>
-  <script defer src="street-navigation.js?v=0ed07cb42c"></script>
-  <script defer src="heading-ink.js?v=56787843dd"></script>
+  <script defer src="street-navigation.js?v=fc042eafd8"></script>
+  <script defer src="heading-ink.js?v=85d52fa25c"></script>
 </head>
 <body class="street-page">
 <a class="skip" href="#about-title">Skip to introduction</a>
@@ -259,38 +259,14 @@
       <div class="scene-reading stop-scroll">
         <div class="about-letter">
           <h1 id="about-title" class="welcome-lettering" tabindex="-1">
-  <svg class="welcome-strip" viewBox="6 13 1276 264" role="img" aria-label="Glad you’re here." focusable="false">
-    <defs>
-      <image id="welcome-words" href="assets/welcome-type.webp" width="768" height="512"/>
-      <clipPath id="opening-words"><path d="M10 78H758V251H450V274H10Z"/></clipPath>
-      <clipPath id="last-word"><rect x="68" y="338" width="542" height="166"/><rect x="474" y="252" width="52" height="51"/></clipPath>
-      <clipPath id="resting-pup"><rect x="18" y="14" width="169" height="113"/></clipPath>
-      <clipPath id="seated-friends"><rect x="72" y="218" width="666" height="287"/></clipPath>
-      <mask id="friend-ink" x="0" y="0" width="768" height="512" maskUnits="userSpaceOnUse" style="mask-type:alpha"><image href="assets/welcome-doodles.webp" width="768" height="512"/></mask>
-      <mask id="friend-strokes" x="0" y="0" width="768" height="512" maskUnits="userSpaceOnUse" style="mask-type:alpha">
-        <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
-          <path pathLength="1" style="--when:.4s;--duration:.65s" stroke-width="58" d="M26 90 Q58 48 96 49 Q126 13 153 42 L160 76 L146 109 L105 100"/>
-          <path pathLength="1" style="--when:.76s;--duration:.72s" stroke-width="62" d="M125 246 Q156 238 152 278 L107 320 L89 354 L144 342 L202 339 L220 387 L180 385 L206 424"/>
-          <path pathLength="1" style="--when:1.17s;--duration:.60s" stroke-width="58" d="M574 420 L603 399 Q632 377 655 411 L676 453 Q695 473 724 423 M657 443 L650 483 L712 481"/>
-          <path pathLength="1" style="--when:1.50s;--duration:.27s" stroke-width="34" d="M294 350 L305 312 L310 288 L331 300 L322 314"/>
-        </g>
-        <rect class="finish-friends" width="768" height="512" fill="white"/>
-      </mask>
-      <g id="welcome-friends" class="friends-on-paper" style="--drawing-mask:url(#friend-strokes)"><rect width="768" height="512" fill="currentColor" mask="url(#friend-ink)"/></g>
-    </defs>
-    <use class="lettering" href="#welcome-words" clip-path="url(#opening-words)"/>
-    <use href="#welcome-friends" clip-path="url(#resting-pup)"/>
-    <g transform="translate(722 -131) scale(.74)">
-      <use class="lettering" href="#welcome-words" clip-path="url(#last-word)"/>
-      <use href="#welcome-friends" clip-path="url(#seated-friends)"/>
-    </g>
-  </svg>
-</h1>
-          <p class="intro-bio">
-            <span class="bio-phrase">I’m Dave.</span>
-            <span class="bio-phrase">I graduated from <span class="school-name"><a class="school-mark south-mark" href="https://southseattle.edu/" target="_blank" rel="noopener noreferrer" aria-label="South Seattle College official website"><img src="assets/south-seattle-logo.png" alt=""></a> South Seattle College</span>,</span>
-            <span class="bio-phrase">then studied computer science at <span class="school-name"><a class="school-mark uw-mark-inline" href="https://www.cs.washington.edu/" target="_blank" rel="noopener noreferrer" aria-label="UW Allen School official website"><img src="assets/uw-block-w.png" alt=""></a> UW’s Allen School.</span></span>
-          </p>
+            <span class="greeting-line"><span class="greeting-words" data-write-title="greeting">Glad you’re here.</span>
+            </span>
+          </h1>
+          <div class="intro-bio">
+            <p class="bio-phrase byline"><span>Hi, I’m Dave.</span><img class="dave-portrait" src="assets/dave-avatar.webp" width="160" height="160" alt="Dave Guo"></p>
+            <p class="bio-phrase bio-story">I live in Seattle and build things for the web. Sometimes I build things for my cat, <span class="pet-name">Leo<img class="leo-portrait" src="assets/leo-avatar.webp" width="224" height="168" alt="">,</span> too.</p>
+            <p class="bio-phrase bio-story">I graduated from <a class="school-name" href="https://www.cs.washington.edu/" target="_blank" rel="noopener noreferrer"><span class="school-mark"><img src="assets/uw-block-w.png" width="368" height="247" alt=""></span>UW’s Allen School</a> in June 2026 with a degree in computer science.</p>
+          </div>
           <div class="hero-ctas">
   <a class="button drawn-button work-button" href="#work">
     <svg class="button-contour" viewBox="0 0 128 50" preserveAspectRatio="none" aria-hidden="true" focusable="false">

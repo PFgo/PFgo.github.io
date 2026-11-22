@@ -1,7 +1,7 @@
-// Centerlines follow the site's Patrick Hand letters, in 100px font units.
+// Pen paths follow the printed shapes of each font at 100px.
 // Each | lifts the pen for a crossbar, a dot, or a second stroke.
 (() => {
-  const strokes = {
+  const patrickStrokes = {
     P: 'M10 -5 L9 -61 Q42 -68 43 -50 Q45 -29 11 -34',
     r: 'M8 -43 Q13 -31 12 -5 M12 -28 Q16 -46 33 -42',
     o: 'M20 -43 C0 -42 3 -3 21 -4 C40 -3 37 -43 20 -43',
@@ -25,18 +25,32 @@
     h: 'M7 -68 L10 -4 M10 -33 Q36 -57 35 -23 L34 -4',
     '.': 'M9 -6 l.4 .4'
   };
+  const caveatStrokes = {
+    G: 'M54 -60 Q49 -78 34 -61 C22 -49 4 -1 22 1 C36 3 48 -18 50 -31 Q43 -34 33 -33',
+    l: 'M30 -66 Q21 -43 14 -23 Q10 -10 11 -2',
+    a: 'M38 -30 C32 -51 11 -25 12 -8 Q14 3 37 -27|M38 -33 Q32 -14 45 -7',
+    d: 'M34 -30 Q22 -39 13 -16 Q7 -3 18 -7 Q34 -15 40 -37|M50 -65 C44 -44 29 -23 35 0',
+    y: 'M16 -38 Q12 -5 22 -8 Q30 -10 38 -37|M38 -36 Q24 -1 16 11 Q5 23 -5 14',
+    o: 'M29 -33 Q15 -30 12 -12 Q10 -1 21 -6 Q36 -15 36 -29 Q36 -42 27 -36',
+    u: 'M22 -38 Q8 -8 15 -7 Q23 -4 39 -32|M39 -32 Q27 -9 36 -3',
+    '’': 'M23 -66 Q31 -60 20 -47',
+    r: 'M22 -41 L13 -5|M16 -20 Q26 -33 38 -33',
+    e: 'M13 -22 Q30 -20 35 -32 Q35 -41 25 -36 C10 -30 6 -4 22 -7 Q28 -8 32 -12',
+    h: 'M30 -66 Q24 -45 12 -7|M14 -14 Q32 -39 41 -31 C48 -28 34 -17 44 -8',
+    '.': 'M14 -12 l-1 4'
+  };
   const glyphs = new Map();
-  function glyphFor(letter) {
-    if (!glyphs.has(letter)) {
-      const passes = strokes[letter].split('|').map(d => {
+  function glyphFor(drawing) {
+    if (!glyphs.has(drawing)) {
+      const passes = drawing.split('|').map(d => {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', d);
         const length = path.getTotalLength();
         return { shape: new Path2D(d), length, duration: Math.max(30, length * .66) };
       });
-      glyphs.set(letter, passes);
+      glyphs.set(drawing, passes);
     }
-    return glyphs.get(letter);
+    return glyphs.get(drawing);
   }
 
   // Each canvas sits on its own word, so the browser still wraps and centers the
@@ -44,11 +58,11 @@
   function makeWord(label, measure, layout, start) {
     const text = label.textContent;
     const width = measure.measureText(text).width + layout.tracking * text.length;
-    const pad = 8;
+    const pad = 20; // Slanted letters can extend well past their advance.
     let time = start;
     const letters = [...text].map((letter, i) => {
       const x = measure.measureText(text.slice(0, i)).width + i * layout.tracking;
-      const passes = glyphFor(letter).map(pass => {
+      const passes = glyphFor(layout.strokes[letter]).map(pass => {
         const at = time;
         time += pass.duration;
         return { ...pass, at };
@@ -61,62 +75,50 @@
     canvas.setAttribute('aria-hidden', 'true');
     canvas.width = Math.ceil((width + 2 * pad) * layout.scale);
     canvas.height = Math.ceil(layout.height * layout.scale);
+    canvas.style.left = -pad / 100 + 'em';
     canvas.style.width = (width + 2 * pad) / 100 + 'em';
     canvas.style.height = layout.height / 100 + 'em';
     const ctx = canvas.getContext('2d');
-    const type = document.createElement('canvas');
-    type.width = canvas.width;
-    type.height = canvas.height;
-    const glyphInk = type.getContext('2d');
-    if (!ctx || !glyphInk) throw new Error('Canvas unavailable');
-    glyphInk.scale(layout.scale, layout.scale);
-    glyphInk.font = measure.font;
-    let inkColor;
-
+    if (!ctx) throw new Error('Canvas unavailable');
     function draw(at, color) {
-      // Use the font itself as the ink. The moving pen reveals it on this
-      // visible canvas instead of animating an SVG mask in a separate layer.
-      if (color !== inkColor) {
-        glyphInk.clearRect(0, 0, width + 2 * pad, layout.height);
-        glyphInk.fillStyle = inkColor = color;
-        for (const unit of letters) glyphInk.fillText(unit.letter, pad + unit.x, layout.baseline);
-      }
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.scale(layout.scale, layout.scale);
+      ctx.setTransform(layout.scale, 0, 0, layout.scale, 0, 0);
+      ctx.font = measure.font;
+      ctx.fillStyle = color;
       const i = letters.findIndex(unit => at < unit.end + 12);
-      const unit = letters[i];
-      if (!unit) return;
-      const left = pad + unit.x;
-      if (i) ctx.fillRect(0, 0, left, layout.height);
+      const active = letters[i];
+      if (!active) return;
       ctx.save();
-      ctx.translate(left, layout.baseline);
-      ctx.lineWidth = 18;
+      ctx.translate(pad + active.x, layout.baseline);
+      ctx.lineWidth = layout.nib;
       ctx.lineCap = ctx.lineJoin = 'round';
-      for (const pass of unit.passes) {
+      for (const pass of active.passes) {
         if (at <= pass.at) break;
         const progress = Math.min(1, (at - pass.at) / pass.duration);
         ctx.setLineDash(progress === 1 ? [] : [progress * pass.length, pass.length + 1]);
         ctx.stroke(pass.shape);
       }
-      ctx.restore();
-      // Blend the last slivers of each glyph into place as the pen lifts.
-      const fill = Math.max(0, Math.min(1, (at - unit.end + 12) / 24));
-      if (fill) {
-        ctx.globalAlpha = fill;
-        ctx.fillRect(left, 0, (letters[i + 1]?.x ?? width + pad) - unit.x, layout.height);
-        ctx.globalAlpha = 1;
-      }
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      // Only the active letter is masked. A slanted stroke or apostrophe can
+      // cross the next letter's advance without getting cut at a word boundary.
       ctx.globalCompositeOperation = 'source-in';
-      ctx.drawImage(type, 0, 0);
+      ctx.fillText(active.letter, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+      const finish = Math.max(0, Math.min(1, (at - active.end + 12) / 24));
+      if (finish) {
+        ctx.globalAlpha = finish;
+        ctx.fillText(active.letter, 0, 0);
+      }
+      ctx.restore();
+      for (let n = 0; n < i; n++) {
+        ctx.fillText(letters[n].letter, pad + letters[n].x, layout.baseline);
+      }
     }
     label.append(canvas);
     return {label, start, end: time, draw};
   }
 
-  function prepare(heading, measure) {
+  function prepare(heading, measure, strokes, nib) {
     const stop = heading.closest('.street-stop');
     if (!stop || stop.dataset.inkArrived === 'complete') return;
     const text = heading.textContent;
@@ -143,7 +145,7 @@
       const metrics = measure.measureText('Hg');
       const height = parseFloat(style.lineHeight) * 100 / size + 70;
       const layout = {
-        height, baseline:(height + metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent) / 2,
+        strokes, nib, height, baseline:(height + metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent) / 2,
         tracking:(parseFloat(style.letterSpacing) || 0) * 100 / size,
         scale:size / 100 * Math.min(devicePixelRatio || 1, 3)
       };
@@ -188,20 +190,26 @@
 
   if (!document.fonts || typeof Path2D === 'undefined' ||
       !document.documentElement.hasAttribute('data-street-navigation-ready')) return;
-  const fontRequestedAt = performance.now();
-  document.fonts.load('100px "Patrick Hand"').then(fonts => {
-    if (!fonts.length) return;
-    const measure = document.createElement('canvas').getContext('2d');
-    if (!measure) return;
-    measure.font = '100px "Patrick Hand"';
-    const metrics = measure.measureText('Hg');
-    if (![metrics.fontBoundingBoxAscent, metrics.fontBoundingBoxDescent].every(Number.isFinite)) return;
-    const fontWasLate = performance.now() - fontRequestedAt > 220;
-    for (const heading of document.querySelectorAll('[data-write-title]')) {
-      // On a slow connection, leave a heading the visitor has read in place.
-      // Later streets can still play their full first arrival.
-      if (fontWasLate && heading.closest('[data-ink-arrived]')) continue;
-      prepare(heading, measure);
-    }
-  }).catch(() => {});
+  // Both headings use the same word-by-word pen, with paths drawn for their
+  // own typeface. Fonts load independently so the flag opening never waits.
+  function loadPen(selector, family, strokes, nib) {
+    const requested = performance.now();
+    const font = '100px "' + family + '"';
+    document.fonts.load(font).then(fonts => {
+      if (!fonts.length) return;
+      const measure = document.createElement('canvas').getContext('2d');
+      if (!measure) return;
+      measure.font = font;
+      const metrics = measure.measureText('Hg');
+      if (![metrics.fontBoundingBoxAscent, metrics.fontBoundingBoxDescent].every(Number.isFinite)) return;
+      for (const heading of document.querySelectorAll(selector)) {
+        const stop = heading.closest('.street-stop');
+        // Never erase a heading that was already visible before its font arrived.
+        if (performance.now() - requested > 220 && stop.hasAttribute('data-ink-arrived')) continue;
+        prepare(heading, measure, strokes, nib);
+      }
+    }).catch(() => {});
+  }
+  loadPen('[data-write-title=""]', 'Patrick Hand', patrickStrokes, 18);
+  loadPen('[data-write-title="greeting"]', 'Caveat', caveatStrokes, 15);
 })();
