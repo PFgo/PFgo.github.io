@@ -29,8 +29,6 @@
       }
     };
     const scenery = new IntersectionObserver(onApproach, { root: rail, rootMargin: '0px 120px' });
-    // Neighbouring facades overlap the frame before their reading stop arrives.
-    const reading = new IntersectionObserver(onApproach, { root: rail, rootMargin: '0px -46%' });
     // The navigation script switches from the static page to its horizontal rail.
     // Measuring sooner can make a slow first visit download the entire static view.
     const watch = () => {
@@ -39,8 +37,7 @@
         document.addEventListener('street-opening-end', watch, {once:true});
         return;
       }
-      stops.forEach(stop =>
-        (stop.dataset.streetArt === 'reading' ? reading : scenery).observe(stop));
+      stops.forEach(stop => scenery.observe(stop));
     };
     if (document.readyState === 'complete') watch();
     else document.addEventListener('DOMContentLoaded', watch, { once: true });

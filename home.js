@@ -1,18 +1,4 @@
 const $=s=>document.querySelector(s);
-function setTheme(dark) {
-  document.body.classList.toggle('dark', dark);
-  $('#appearance').setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-  document.querySelector('meta[name="theme-color"]').content = dark ? '#0c0e12' : '#faf8f1';
-}
-let storedTheme;
-try { storedTheme = localStorage.getItem('dave-theme'); } catch {}
-setTheme(storedTheme === 'dark');
-$('#appearance').onclick = () => {
-  const dark = !document.body.classList.contains('dark');
-  setTheme(dark);
-  try { localStorage.setItem('dave-theme', dark ? 'dark' : 'light'); } catch {}
-};
-$('#appearance').hidden = false;
 
 const projects = {
   "habitail": {
@@ -105,7 +91,7 @@ function openProject(project, trigger) {
   content.append(list, tech);
   const links = $('#dialog-links');
   links.replaceChildren();
-  const resume = {text:'View résumé', url:'assets/dave-guo-resume.pdf'};
+  const resume = {text:'View résumé', url:'assets/dave-guo-resume.pdf?v=8358a15dab'};
   for (const link of [...project.links, resume]) {
     const anchor = document.createElement('a');
     anchor.className = link === resume ? 'button subtle' : 'button blue';

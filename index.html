@@ -6,14 +6,14 @@
   <meta name="description" content="Dave Guo’s portfolio, projects, and education in Seattle.">
   <title>Dave Guo</title>
   <link rel="preload" href="assets/patrick-hand.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="home.css?v=be402c0a08">
-  <link rel="stylesheet" href="tour.css?v=26be881b17">
+  <link rel="stylesheet" href="home.css?v=d76868134f">
+  <link rel="stylesheet" href="tour.css?v=7a61dd1c11">
   <link rel="stylesheet" href="market-stop.css?v=promenade02">
-  <link rel="stylesheet" href="landmarks.css?v=fa66a27968">
+  <link rel="stylesheet" href="landmarks.css?v=cbcc9df6ff">
   <link rel="stylesheet" href="heading-ink.css?v=ae6b5b1798">
   <noscript><style>.street-tree { background: url("assets/tree-cherry.webp") center / 100% 100% no-repeat; }</style></noscript>
-  <script defer src="street-art.js?v=5eff654228"></script>
-  <script defer src="home.js?v=29ab0c82ef"></script>
+  <script defer src="street-art.js?v=10d4b751a1"></script>
+  <script defer src="home.js?v=5135b2b119"></script>
   <script defer src="harbor-wheel.js?v=617650e260"></script>
   <script defer src="street-navigation.js?v=fc042eafd8"></script>
   <script defer src="heading-ink.js?v=85d52fa25c"></script>
@@ -25,8 +25,44 @@
   <header class="tour-header">
     <a href="#about" class="city-label" aria-label="Seattle, back to the beginning"><i class="compass" aria-hidden="true"></i><span>Seattle, WA</span></a>
     <nav class="route-nav" aria-label="Along the street"><a data-route href="#about">About</a><a data-route href="#work">Projects</a><a data-route href="#experience">Experience</a><a data-route href="#contact">Say hi</a></nav>
-    <button id="appearance" class="appearance" type="button" aria-label="Switch color theme" title="Switch color theme" hidden>◐</button>
   </header>
+  <script>
+    (() => {
+      const themeColor = document.querySelector('meta[name="theme-color"]');
+      let clock;
+      let timer;
+
+      function syncLocalTime() {
+        const now = new Date();
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        const dark = hour < 7 || hour >= 19;
+        document.body.classList.toggle('dark', dark);
+        const skyColor = dark ? '#0c0e12' : '#faf8f1';
+        if (themeColor.content !== skyColor) themeColor.content = skyColor;
+
+        if (clock) {
+          // The spindle is (0, 0) in the dial's own SVG coordinates.
+          clock.querySelector('.market-hour-hand').setAttribute('transform', `rotate(${(hour % 12) * 30 + minute / 2} 0 0)`);
+          clock.querySelector('.market-minute-hand').setAttribute('transform', `rotate(${minute * 6} 0 0)`);
+          clock.setAttribute('data-clock-ready', '');
+        }
+
+        clearTimeout(timer);
+        if (!document.hidden) timer = setTimeout(syncLocalTime, 60_000 - now.getTime() % 60_000);
+      }
+
+      // Choose the sky before first paint, then set the hands once the street exists.
+      syncLocalTime();
+      document.addEventListener('DOMContentLoaded', () => {
+        clock = document.getElementById('market-clock');
+        syncLocalTime();
+      }, { once: true });
+      window.addEventListener('pageshow', syncLocalTime);
+      window.addEventListener('focus', syncLocalTime);
+      document.addEventListener('visibilitychange', syncLocalTime);
+    })();
+  </script>
   <main id="street-rail" tabindex="-1" aria-label="Dave’s Seattle street">
     <div class="street-world">
       <div class="seattle-stage city-stage" role="img" aria-label="An illustrated Seattle street. A flag on the Space Needle reads “Open to work”. Walk past Pike Place Market, Suzzallo Library and Drumheller Fountain to the Great Wheel and ferry on Elliott Bay.">
@@ -95,6 +131,27 @@
               <path d="M9 22Q0 24 2 19m7 37Q0 58 2 53" fill="none"/>
             </g>
           </g>
+        </svg>
+        <svg id="market-clock" viewBox="-110 -110 220 220" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <image href="assets/market-clock-paper.webp" x="-109.5" y="-109.5" width="220" height="220" onload="this.parentNode.setAttribute('data-dial-ready', '')"/>
+          <defs>
+            <linearGradient id="clock-enamel">
+              <stop stop-color="#a7252a"/><stop offset=".44" stop-color="#ea4946"/><stop offset="1" stop-color="#bd262d"/>
+            </linearGradient>
+          </defs>
+          <g fill="url(#clock-enamel)" stroke="#76252a" stroke-width="1.8" stroke-linejoin="round">
+            <g class="market-hour-hand">
+              <path d="M-3.8 3.3 -4.6-41 Q-6.1-48-4.6-54 L-.8-67 Q0-69 1.2-66.7 L5-54 Q6-49 4.6-41 L3.5 3.3Z"/>
+              <path d="M-1.5-49-.5-61" fill="none" stroke="#f87b69" stroke-width="1.3" stroke-linecap="round"/>
+            </g>
+            <g class="market-minute-hand">
+              <path d="M-3.2 3-2.4-61 Q-4.1-66-3.4-71 L-.7-79.6 Q.2-81.2 1.1-79.5 L3.7-71 Q4.4-65 2.7-61 L3.2 3Z"/>
+              <path d="m-.9-66 .5-9" fill="none" stroke="#ff8c77" stroke-width="1.1" stroke-linecap="round"/>
+            </g>
+          </g>
+          <circle cy=".7" r="10" fill="#a52c30" stroke="#70272a" stroke-width="1.6"/>
+          <circle r="7.1" fill="#ce3334" stroke="#ed5a4a" stroke-width="1"/>
+          <circle cx="-1" cy="-1.4" r="2.1" fill="#f58062"/>
         </svg>
         <span class="drumheller-water" data-landmark aria-hidden="true"></span>
         <div class="harbor-wheel" data-street-art data-landmark aria-hidden="true">
@@ -274,7 +331,7 @@
     </svg>
     <span>Visit the bakery</span>
   </a>
-  <a class="button drawn-button resume-button" href="assets/dave-guo-resume.pdf" download="Dave-Guo-Resume.pdf">
+  <a class="button drawn-button resume-button" href="assets/dave-guo-resume.pdf?v=8358a15dab" download="Dave-Guo-Resume.pdf">
     <svg class="button-contour" viewBox="0 0 174 50" preserveAspectRatio="none" aria-hidden="true" focusable="false">
       <path class="button-last-stroke" pathLength="1" d="M133 45 C101 47 67 45 35 46 C17 47 5 42 3 29 C1 16 10 6 26 5 C65 3 102 5 143 4 C161 4 171 11 171 25 C171 38 160 45 146 45 C140 45 133 46 127 45"/>
     </svg>
@@ -294,17 +351,17 @@
         <h2 id="work-heading" data-write-title>Project bakery</h2>
         <p>Pick a loaf to see what I made.</p>
       </header>
-      <div class="market-loaves" data-street-art="reading" role="group" aria-labelledby="work-heading">
+      <div class="market-loaves" role="group" aria-labelledby="work-heading">
         <a class="market-loaf" data-project="habitail" href="https://habitail.pet/" aria-label="Visit the HabiTail store">
-          <span class="market-tray"><noscript><img src="assets/bread-sourdough.webp" alt="" width="490" height="490"></noscript></span>
+          <span class="market-tray"><img src="assets/bread-sourdough.webp" alt="" width="490" height="490" loading="lazy" decoding="async"></span>
           <span class="market-ticket"><strong>HabiTail</strong><small>Pet supplies store</small></span>
         </a>
         <a class="market-loaf" data-project="cookies" href="https://github.com/AryanV08/CookiesShallNotPass" aria-label="View CookiesShallNotPass on GitHub">
-          <span class="market-tray"><noscript><img src="assets/bread-knot.webp" alt="" width="490" height="490"></noscript></span>
+          <span class="market-tray"><img src="assets/bread-knot.webp" alt="" width="490" height="490" loading="lazy" decoding="async"></span>
           <span class="market-ticket"><strong>Cookies<wbr>Shall<wbr>Not<wbr>Pass</strong><small>Cookie controls</small></span>
         </a>
-        <a class="market-loaf" data-project="file-search" href="assets/dave-guo-resume.pdf" aria-label="Read about the File System Search Engine in Dave’s résumé">
-          <span class="market-tray"><noscript><img src="assets/bread-baguettes.webp" alt="" width="490" height="490"></noscript></span>
+        <a class="market-loaf" data-project="file-search" href="assets/dave-guo-resume.pdf?v=8358a15dab" aria-label="Read about the File System Search Engine in Dave’s résumé">
+          <span class="market-tray"><img src="assets/bread-baguettes.webp" alt="" width="490" height="490" loading="lazy" decoding="async"></span>
           <span class="market-ticket"><strong>File System Search Engine</strong><small>Local file search</small></span>
         </a>
       </div>
@@ -319,7 +376,7 @@
           <div><dt>Ishoni Yakiniku</dt><dd>Server · Seattle · Since September 2024</dd><dd>I take orders, show guests how the tabletop grills work, and help keep service moving.</dd></div>
           <div><dt class="education-school"><img src="assets/uw-block-w.png" width="368" height="247" alt=""><span>University of Washington</span></dt><dd>Allen School · June 2026</dd><dd>B.S. in Computer Science</dd></div>
         </dl>
-        <a class="resume-note" href="assets/dave-guo-resume.pdf" target="_blank" rel="noopener">View my résumé</a>
+        <a class="resume-note" href="assets/dave-guo-resume.pdf?v=8358a15dab" target="_blank" rel="noopener">View my résumé</a>
       </div></div>
     </section>
     <section id="contact" class="street-stop bay-stop" data-location="Pier 57 · Elliott Bay" aria-labelledby="contact-heading">

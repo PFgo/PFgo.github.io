@@ -90,6 +90,18 @@
 .harbor-wheel img, .harbor-wheel canvas { display:block; width:100%; height:100%; }
 .harbor-wheel [hidden] { display:none; }
 
+/* The painted clock's spindle sits at (2939.5, 227.5) in the 8400 × 724 street. */
+#market-clock {
+  position: absolute;
+  left: 33.68452381%;
+  top: 16.22928177%;
+  width: 2.61904762%;
+  height: 30.38674033%;
+  pointer-events: none;
+  visibility: hidden;
+}
+#market-clock[data-clock-ready][data-dial-ready] { visibility: visible; }
+
 /* The mast meets the painted spire at (1533, 48) in the 8400 × 724 panorama. */
 .needle-banner {
   position: absolute;
