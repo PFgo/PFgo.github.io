@@ -105,7 +105,9 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  overscroll-behavior: contain;
+  /* The waterfront ends with the rail. Keep the sky from showing past it
+     during a rubber-band gesture, while retaining vertical scroll chaining rules. */
+  overscroll-behavior: none contain;
   overflow-anchor: none;
   scrollbar-width: none;
   isolation: isolate;
@@ -384,6 +386,17 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   font-weight: 400;
   font-display: swap;
 }
+/* The pen and the final text share the same Caveat outlines. This subset
+   omits contextual substitutions and kerning so neighboring letters cannot
+   reshape completed ink. It arrives with this render-blocking stylesheet.
+   Source and license: assets/caveat-regular.woff2 and assets/caveat-license.txt. */
+@font-face {
+  font-family: "Seattle Greeting Ink";
+  src: url("data:font/woff2;base64,d09GMgABAAAAAAoUABAAAAAAETAAAAm3AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbIBwqBmA/U1RBVC4AgQwRCAqXcJEbATYCJANACyIABCAFgyQHIAwHG6EMUZSPVoTgiwPbmHNY0dda2LRk5BXOmROllYyoH852PN362fYF4Myt38Ed2RHVGR+k4uH/x+F9f1QjMkLaWVokIhOcVoXUVtXEFn0pa21QTbI59oYgbh0tR5CKoanxDlo1ezlp2p+/1JXzZbgiqtKmqJDawmrtMqvdFeTk3FmW6dEOEOtHXaj/Ab5h3/9aqzt36aJoPgdKIGRCslL+rs8OZnNiaY/GJtRb4hGSiFeLhERJFSvxCioEzdxs6UcOYAALAEklBAX5RIZqlrCe6MRMoMkEwGwGRccSrZyR9sZZLG2tBxkMcD2Kw9hEIEPadcsBgAR7d2wKfH0E2X4gAOZlutH0KDgI1vVy/OD/qwD4KxYIaBw7disrWMOnTLkkiaw5KqR1g7EVW5adwa1QcGI6fAkUIUnUhWL7kQ1W4BFPz1fPU6xSlYxqNWjWpqtevjQFgZg2Khhebf5gfmDeba7kWBpDN/8tW10RSCL+zRDs5YG1JLLw5mGodwtqNCxpimu59celnmv5WoEPL1JQGePED9IFWrPWQdvWN2iecl1y0ZgSKeX7B0IqkLwodS3x7iGHYVMNMQrKWVVuntWHb39T+3Em7u6UgAbp3VO8V92Kn6fx98+4+9EmcNgPNZJhRGgWroMZFIIJQ/Q7KgYmWBaglHuoXxK7G0YHEDypzHffG3C94GVjErnev5BDQrLiNZUBBx6FjM1+a68WqQQHA9tJAJS1JlqotDDcFLxrt8fluR9/LwM7uzvJuZydNIhMoER3kEkGBfkviT44GMM9IeWaOJk1edtis5QgP3P6moEzCQ2PdpPdS32UUk+Md375Z3sa2zaopZ7TwaLT935Yr7d8/4PUV65iT0SOkosMicILCZyjRKvxabNC8WAjBeyfaaMlTklNjALZ3rx+T+nm2qW/ieTjvV/7g/h7UfU2oWarXSb6E0laqL7Pv5Ci4M1G6jeY6OKgWR0V0p/Yqo8pqLkAla36LDUmfMCwql0iMrht8XEcTAmIwxKTNq9+EinEe5+81KnMoVEc1bFyv5Zw7ya1X0Qg8prjSbyvHDCQDuHEts52E2jcgR7HlZtRtFPcRrv1IIaAHcchnFaRniEFhllk9YcVvy4t8tY+4b6qcSalfCrzKpd6Rs755e8/fyVB41918/pKCMXG5kpPyNQJGl2umVYt4rZYnAMZb6ZxgkswODlqT86BZYfKGP+syVF2MyJkSFjswZFodQf7R4mhEL61qFg1PE6qJtOvanIHcHGWXX4xiGQc0eg6QAocm8Y85BjvLzaMqQHDHSElK4JYVnGo349psGQeBWG+PG/HlQg0EoBDw+9PKajJpdzV1RbHbZzkrnt/jTH0QM4hsXdECllmDVZlKreUnFb126q35xKRWfJOYnhG9OrgdHV8JBPXlhgVtZRn4eLAfFh7hDOSoFk12E2f9Wqup+dr1AQixY8O6w12cy9eZoODpqpl51JDiG9t64HOJTQjir3VcbLgFX9s//mTJKxHlr+Dd+zpTH0VeUOfP/hfd25Lqtt1BV9ZhqqegyzqcZdRR/b/WJ7a9Wbm519T1rsWvQg+to1XguLuhJeF26q469Bbd1laLV69hNheTb3vrI5ilT4NNzg2ZTBgJx3SdyhfbocS/jStJNT6rSDK6o0tUDOhcTsgF6mflxU/WQUooLM2dpV2C4rhucUvsIv5k4Tg5k/aeidE2lQXDSUnapuqHnnKnH9iFr54Wbyb+f13cguriODvmoVTMwjxA35YUAt1qk/gFnL0hjKc+LbE1bg85n3/ostXp/IRBco+dRCbjjBVNCYX0sV/1CmfYy9XQXWTdidCNCJq937bjl8E0iMK2Wnv7WlJx/7a3rOeGcY/ceZY/JNLjbeYjJ5J+IgOzUGkzsuKjqnyxpKo6/tUkVFJGdNLaGwv/5QFU56CqfwwK7C9SiSqt3glW5SPxRWmOB+3xxLEUbMPRYU2jpEl2Gd9WP66kWmV5MfKO2GbbFtokT85i6YjR1OkGfj0g7rLG15f31YlWL5rx+CMNve4ZfI/UNEYXtmPSp5Z7uiW/O7Nq7C0shrT+7kcjecQvQ/TaWuMxpdElNF/NUfOqmonkzt9GCv+SY4tbabQOJOHF28f84xvv9UGzu7ffbZIs3KU0Mb20gmx47FP3s78ClbunaWS9OFuAwlKoXC2/rH+xom6onq67tDOWyFRLbYiTOF9lp5U7zx3rH90kjh+wD9Zpnu6Vu0dzKNTr8q4XYdsL/s/mTNPAyM0JY8rOnLsIlNu9ngt2uvU80r/L79+rZQ2wpvDUA/4YldmU/QQZWi1dYAGUwKXqWK/3P3XtGOHO6AZhDBENjxlsG4tPFDbQUvkFfNoV4FYQ6z0HQOczB+7BgTSmAzFvR3B+/Uw2N6kaU3QU+Xbbx0UokIqrZwgJyIUg2qNiiip7j2Z1kGzHYRgfb3dhsXOEDu1CBBqCNTefzyThKgEYkD+13dFvkpmCSs57Fcr7b5aO3Ggp0NIUUg1L3IbD+4ampGZyf9gSnD14CR2Dpl8MEkVa+i+cDSA5562XeT9yiMx9QljLLQ3Dq+zc5tdo3RR6vbObyvtWPm2YfduUWve38Bv6a3RPtXfiqgrAGVBTvfHg9prWZEunw3XeiMn1ePQN3uAB+kxK0cvZZIdz2cS26+jJYl/L+QLuBEjYvV2TwMscj8ILkl0oVeHXpigCGvpT1KWbVffFH30dtWtnFPpfAoXPHi73IYpc5VB8m37yFVe5HGPUa3zp1acudxT6Bz/wKlNnz8UR//qk/0nbX87GGA4ddmFfuGbDseohLMJ0kn+aypcI3pn3njS+ebRhS9SMgWyDyrJUm8XJrfbF2CPPYqR4ilujHJO/5Mwk3Ac+Nrm6CQFJr1cB9f3TkyrpORHb3mejEgky/w0+slExxfpWdtw/NLfB9jHzxXGhGJu0Dda6nlZv54b9Nl+xQvnxSvN38y+6TRpHwBQpMbav9sAaRyS+q38P4Q84DcPYS+gORGQEtsgLUZBSUSBMcohMi5CoVWQGaVQHEYwRDPURZb5AhyHBG0OwOcJVnimDryK4tAtwaUvkw6LNVcqtFucSoo9pjJ0ubk1E01lqQxWq+wWGGCF4xCGdfcRnQaNujQzMTBqZc2XNx9qB2YSUNnQKdXOqRTjVM2NsdrtLedwbTYZ/zGxRZBzd9yqMeMAXlrBwAQ22pTxbFxoUEdig1T+TrlSlQPrUWyht5YPWnKRIYVGtVPiGM0BVKKpIRoIjLO5RjrFBm0wloLLG68caMFOHhz0ykLINCVlOwqevLVKtsptGsIpXZm35cu9EzMPGxoHAAAA") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
 .about-letter .welcome-lettering {
   container-type: inline-size;
   width: min(100%, 34rem);
@@ -394,7 +407,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
-  font: 400 clamp(2rem, 15.7cqi, 5.1rem)/1.12 "Caveat", var(--hand);
+  font: 400 clamp(2rem, 15.7cqi, 5.1rem)/1.12 "Seattle Greeting Ink", "Caveat", var(--hand);
   letter-spacing: -.025em;
   color: var(--route-blue);
 }

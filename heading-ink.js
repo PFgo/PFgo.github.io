@@ -69,26 +69,41 @@
       });
       const end = time;
       time += 12; // Lift the pen between letters.
-      return {letter, x, passes, end};
+      const native = document.createElement('span');
+      native.textContent = letter;
+      return {letter, x, passes, end, native};
     });
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
     canvas.width = Math.ceil((width + 2 * pad) * layout.scale);
     canvas.height = Math.ceil(layout.height * layout.scale);
     canvas.style.left = -pad / 100 + 'em';
+    canvas.style.top = -layout.baseline / 100 + 'em';
     canvas.style.width = (width + 2 * pad) / 100 + 'em';
     canvas.style.height = layout.height / 100 + 'em';
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas unavailable');
+    let written = 0;
     function draw(at, color) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.setTransform(layout.scale, 0, 0, layout.scale, 0, 0);
+      ctx.setTransform(canvas.width / (width + 2 * pad), 0, 0, canvas.height / layout.height, 0, 0);
       ctx.font = measure.font;
       ctx.fillStyle = color;
       const i = letters.findIndex(unit => at < unit.end + 12);
       const active = letters[i];
       if (!active) return;
+      while (written < i) {
+        const previous = letters[written++].native;
+        previous.className = 'ink-mark';
+        previous.style.removeProperty('opacity');
+      }
+      // Let the native letter take over while the pen lifts. Previously the
+      // entire completed word switched from canvas to HTML on one frame.
+      const finish = Math.max(0, Math.min(1, (at - active.end + 12) / 24));
+      active.native.className = 'ink-mark';
+      active.native.style.opacity = finish;
+      canvas.style.opacity = 1 - finish;
       ctx.save();
       ctx.translate(pad + active.x, layout.baseline);
       ctx.lineWidth = layout.nib;
@@ -104,17 +119,14 @@
       ctx.globalCompositeOperation = 'source-in';
       ctx.fillText(active.letter, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
-      const finish = Math.max(0, Math.min(1, (at - active.end + 12) / 24));
-      if (finish) {
-        ctx.globalAlpha = finish;
-        ctx.fillText(active.letter, 0, 0);
-      }
       ctx.restore();
-      for (let n = 0; n < i; n++) {
-        ctx.fillText(letters[n].letter, pad + letters[n].x, layout.baseline);
-      }
     }
-    label.append(canvas);
+    // Anchor at the same inline baseline as the native word, including when
+    // line heights or the pixel ratio produce fractional pixel coordinates.
+    const anchor = document.createElement('span');
+    anchor.className = 'ink-baseline';
+    anchor.append(canvas);
+    label.replaceChildren(anchor, ...letters.map(unit => unit.native));
     return {label, start, end: time, draw};
   }
 
@@ -214,5 +226,5 @@
     }).catch(() => {});
   }
   loadPen('[data-write-title=""]', 'Patrick Hand', patrickStrokes, 18);
-  loadPen('[data-write-title="greeting"]', 'Caveat', caveatStrokes, 15);
+  loadPen('[data-write-title="greeting"]', 'Seattle Greeting Ink', caveatStrokes, 15);
 })();

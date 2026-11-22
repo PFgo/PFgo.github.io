@@ -1,10 +1,17 @@
 @media (prefers-reduced-motion: no-preference) {
   .ink-prepared .ink-word { position: relative; display: inline-block; }
   .ink-prepared .ink-word:not(.ink-written) { color: transparent; }
+  .ink-word .ink-mark { color: var(--route-blue); }
+  .ink-written .ink-mark { opacity: 1 !important; }
+  .ink-baseline {
+    display: inline-block;
+    position: relative;
+    width: 0;
+    height: 0;
+    vertical-align: baseline;
+  }
   .ink-word canvas {
     position: absolute;
-    left: -.08em;
-    top: -.35em;
     pointer-events: none;
   }
   .ink-written canvas { display: none; }
