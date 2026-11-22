@@ -326,7 +326,14 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 }
 .street-page .street-motion span { transform: scale(.75); }
 @media (max-width:700px) {
-  .street-page { --street-natural-height: min(43vw, 32dvh); --block-min-width: 0px; }
+  .street-page {
+    --street-natural-height: min(43vw, 32dvh);
+    --block-min-width: 0px;
+    --needle-width: min(35vw, 166px);
+    /* The mast is 18.25% across the four-block painting. Leave room for its fly. */
+    --first-trim: max(0px, calc(.72 * (var(--block-width) - 100vw)),
+      calc(.73 * var(--block-width) + var(--needle-width) + var(--tour-gutter) - 100vw));
+  }
   .street-world .street-traffic { --walker-size: clamp(23px, 6.5vw, 39px); }
   .painted-market-sign { font-size: clamp(.4rem,1.7vw,.63rem); letter-spacing: .06em; }
 }

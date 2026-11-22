@@ -365,7 +365,7 @@
     const flag = banner.getBoundingClientRect();
     if (!flag.width || !view.height) return;
 
-    // Frame the actual cloth, which flies left on phones and right on wider screens.
+    // Frame the cloth using its position in the responsive street scene.
     const narrow = matchMedia('(max-width: 700px)').matches;
     const scale = Math.min(narrow ? 1.85 : 2.15, .76 * view.width / flag.width);
     const focusX = flag.left + flag.width / 2 - street.left;

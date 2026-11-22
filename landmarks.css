@@ -95,19 +95,10 @@
   position: absolute;
   left: 18.25%;
   top: 6.63%;
-  width: clamp(118px, 12vw, 178px);
+  width: var(--needle-width, clamp(118px, 12vw, 178px));
   height: auto;
   overflow: visible;
   transform: translate(-1.65%, -100%);
 }
 .banner-title { font: 400 29px "Patrick Hand", "Trebuchet MS", sans-serif; }
-.banner-title.ink-left { display: none; }
-@media (max-width: 700px) {
-  /* Fly into the frame on narrow streets. Keep the lettering front-facing. */
-  .needle-banner { width: clamp(140px, 36vw, 166px); transform: translate(-98.35%, -100%); }
-  .banner-facing { transform: translateX(210px) scaleX(-1); }
-  .banner-lettering { transform: translateX(176px) scaleX(-1); }
-  .banner-title.ink-right { display: none; }
-  .banner-title.ink-left { display: inline; }
-}
 html:not([data-street-navigation-ready]) .needle-banner { width: 12%; }
