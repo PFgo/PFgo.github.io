@@ -91,7 +91,12 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   border-radius: 65% 34% 52% 26%; background: var(--route-blue); transform: rotate(-3deg) scaleX(0);
   transition: transform .22s;
 }
-.route-nav a.is-current, .route-nav a:hover, .city-label:hover { color: var(--route-blue); }
+/* Keep the four stops steady as the narrower blue handwriting takes over. */
+.route-nav a[href="#about"] { min-inline-size: 2.9em; }
+.route-nav a[href="#work"] { min-inline-size: 3.9em; }
+.route-nav a[href="#experience"] { min-inline-size: 5.3em; }
+.route-nav a[href="#contact"] { min-inline-size: 2.9em; }
+.route-nav a.is-current, .route-nav a:hover, .city-label:hover { color: var(--route-blue); font-family: var(--hand); }
 .route-nav a.is-current::after { transform: rotate(-3deg) scaleX(1); }
 #street-rail {
   position: relative;
@@ -118,7 +123,11 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   scrollbar-width: thin;
   display: grid; align-items: safe center; justify-items: center;
 }
-.about-letter { width: min(98%, 45rem); text-align: center; transform: translateX(-4vw); }
+.about-letter {
+  --sans: ui-rounded, "SF Pro Rounded", "Nunito Intro", system-ui, sans-serif;
+  font-family: var(--sans);
+  width: min(98%, 45rem); text-align: center; transform: translateX(-4vw);
+}
 .about-letter h1 { margin: 0; }
 .about-letter h1:focus { outline: none; }
 .intro-bio {
@@ -130,8 +139,8 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 .intro-bio .school-mark { margin: 0 .025em 0 .05em; }
 .about-letter .hero-ctas { justify-content: center; gap: .55rem; }
 .about-letter .hero-ctas .button { min-height: 42px; font-size: 1.02rem; padding: .45rem 1.22rem; }
-.about-letter .hero-ctas .work-button { color: var(--route-blue); }
-.street-title { font: 400 clamp(2.2rem, 4.5vw, 3.75rem)/1.05 var(--sans); color: var(--route-blue); margin: 0; }
+.about-letter .hero-ctas .work-button { color: var(--route-blue); font-family: var(--hand); }
+.street-title { font: 400 clamp(2.2rem, 4.5vw, 3.75rem)/1.05 var(--hand); color: var(--route-blue); margin: 0; }
 .pier-notes { width: min(92%, 43rem); text-align: center; }
 .pier-notes .street-title { font-size: clamp(2rem, 3.7vw, 3.2rem); }
 .notebook { margin: 1.25rem 0 .75rem; display: grid; grid-template-columns: 1fr 1fr; text-align: left; gap: 1.65rem; }
@@ -143,7 +152,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   padding: .19em; background: #fff; border-radius: 50%; object-fit: contain;
 }
 .notebook dd { color: var(--route-muted); margin: 0 0 .35rem; font-size: 1.04rem; line-height: 1.25; }
-.resume-note { color: var(--route-blue); font-size: 1.05rem; text-decoration: underline; text-underline-offset: .21em; }
+.resume-note { color: var(--route-blue); font: 400 1.05rem/1.5 var(--hand); text-decoration: underline; text-underline-offset: .21em; }
 .harbor-contact { text-align: center; }
 .harbor-contact .street-title { font-size: clamp(3.35rem, 7vw, 5.7rem); transform: rotate(-2deg); }
 .harbor-contact .contact-links { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 1.05rem; margin: 1.3rem 0 0; }
@@ -163,7 +172,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 .direction { justify-self: end; gap: .45rem; }
 .scroll-hint { margin-right: .45rem; font-size: 1rem; color: var(--route-muted); }
 .direction button { display: grid; place-content: center; width: 42px; height: 42px; padding: 0; border: 0; background: transparent; color: var(--route-ink); }
-.direction button span { display: grid; place-content: center; width: 31px; height: 31px; line-height: 1; font: 300 1.6rem/.9 Georgia,serif; border: 1.4px solid var(--route-ink); border-radius: 48% 51% 47% 52%; padding-bottom: 4px; }
+.direction button span { display: grid; place-content: center; width: 31px; height: 31px; font: 300 1.6rem/1 var(--sans); border: 1.4px solid var(--route-ink); border-radius: 48% 51% 47% 52%; }
 .direction button:disabled { opacity: .28; cursor: default; }
 .direction button:not(:disabled):is(:hover,:focus-visible) span { background: var(--route-ink); color: var(--bg); }
 @media (prefers-reduced-motion: no-preference) {
@@ -203,6 +212,12 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   .street-title, .pier-notes .street-title { font-size: 1.85rem; }
   .scene-reading { padding-block: .3rem .6rem; }
 }
+@media (max-width: 380px) {
+  .tour-header { grid-template-columns: auto minmax(0,1fr); column-gap: .4rem; }
+  .route-nav { column-gap: .35rem; }
+  .route-nav a { font-size: 1rem; }
+}
+.project-dialog h2 { overflow-wrap: anywhere; }
 /* Compare the available width with the reader’s chosen type size. */
 @container tour (max-width: 19rem) {
   .tour-header { grid-template-columns: 1fr; }
@@ -329,7 +344,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   display: grid; place-items: center; padding-inline: 2px; white-space: nowrap;
   color: #f1ead2; background: #415e58; border: 1px solid #354741;
   box-shadow: inset 0 1px #92a794, 0 2px #2d413a; transform: rotate(-.35deg);
-  font: 600 clamp(.43rem, min(.97vw,1.55dvh),1.05rem)/1 system-ui,sans-serif;
+  font: 600 clamp(.43rem, min(.97vw,1.55dvh),1.05rem)/1 var(--sans);
   letter-spacing: .11em;
 }
 .city-stage .lane-bookshop { --travel-time: 189s; --travel-start: -12s; }
@@ -379,24 +394,11 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
-  font: 400 clamp(2rem, 15.7cqi, 5.1rem)/1.12 "Caveat", var(--sans);
+  font: 400 clamp(2rem, 15.7cqi, 5.1rem)/1.12 "Caveat", var(--hand);
   letter-spacing: -.025em;
   color: var(--route-blue);
 }
 .greeting-words { transform: rotate(-1deg); }
-/* Once the introduction is readable, a late font must not rewrap the copy
-   or its buttons. Reuse the same preloaded font file with a local policy. */
-@font-face {
-  font-family: "Intro Hand";
-  src: url("assets/patrick-hand.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: optional;
-}
-.about-letter :is(.intro-bio, .hero-ctas) {
-  --sans: "Intro Hand", "Chalkboard SE", "Segoe Print", cursive;
-  font-family: var(--sans);
-}
 .about-letter .intro-bio {
   max-width: 32rem;
   margin: clamp(1rem, 3dvh, 1.8rem) auto clamp(.85rem, 2dvh, 1.3rem);

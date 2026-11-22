@@ -109,7 +109,8 @@
 @media(max-width:700px){.contact-links{gap:16px}.contact-links .contact-display{width:62px;height:62px;border-radius:18px}.contact-links .contact-logo{width:30px;height:30px}.contact-links .gmail-logo img{width:30px;height:30px}}
 @media(prefers-reduced-motion:reduce){.contact-links .contact-display:hover .contact-logo{transform:none}}
 
-/* Hand lettering for the greeting, navigation, and reading text. */
+/* Blue ink uses the original handwriting. The rest of the interface uses
+   the platform's rounded face, with Nunito on browsers without one. */
 @font-face {
   font-family: "Patrick Hand";
   src: url("assets/patrick-hand.woff2") format("woff2");
@@ -117,8 +118,24 @@
   font-weight: 400;
   font-display: swap;
 }
+@font-face {
+  font-family: "Nunito";
+  src: url("assets/nunito-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+/* The introduction holds its line breaks if the fallback arrives after paint. */
+@font-face {
+  font-family: "Nunito Intro";
+  src: url("assets/nunito-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: optional;
+}
 :root {
-  --sans: "Patrick Hand", "Chalkboard SE", "Segoe Print", cursive;
+  --hand: "Patrick Hand", "Chalkboard SE", "Segoe Print", cursive;
+  --sans: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif;
   --serif: var(--sans);
 }
 body { font-size: 1.125rem; line-height: 1.5; letter-spacing: normal; }

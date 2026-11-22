@@ -154,7 +154,7 @@
       try {
         pictures = labels.map(label => {
           const part = makeWord(label, measure, layout, time);
-          time = part.end + 30;
+          time = part.end + 65; // Give the pen a little room to move to the next word.
           return part;
         });
       } catch {
@@ -163,12 +163,15 @@
         return;
       }
       let word = 0;
+      const penTime = pictures[pictures.length - 1].end;
+      // Keep the same rhythm for short greetings and cap the wait for long titles.
+      const duration = Math.min(3200, penTime * 1.85);
       const began = performance.now();
       let dark = document.body.classList.contains('dark');
       let color = style.color;
       function paint(now) {
         if (stop.dataset.inkArrived !== 'playing') return;
-        const at = now - began;
+        const at = (now - began) * penTime / duration;
         while (word < pictures.length && at >= pictures[word].end) {
           pictures[word++].label.classList.add('ink-written');
         }

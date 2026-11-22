@@ -112,5 +112,5 @@
   overflow: visible;
   transform: translate(-1.65%, -100%);
 }
-.banner-title { font: 400 29px "Patrick Hand", "Trebuchet MS", sans-serif; }
+.banner-title { font: 500 22px var(--sans); }
 html:not([data-street-navigation-ready]) .needle-banner { width: 12%; }

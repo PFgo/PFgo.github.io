@@ -108,8 +108,9 @@
           finishArrival(stop);
         } else {
           stop.dataset.inkArrived = 'playing';
-          // Always leave readable text, even if a font or an animation is interrupted.
-          window.setTimeout(() => finishArrival(stop), 2200);
+          // Normal completion comes from the pen. Allow its longest (3.2s)
+          // title to finish before recovering from a stalled font or canvas.
+          window.setTimeout(() => finishArrival(stop), 4000);
         }
       } else if (ink === 'playing' && (distance >= .86 || reducedMotion.matches)) {
         finishArrival(stop);

@@ -14,7 +14,7 @@
 }
 .market-copy h2 {
   margin:0;
-  font:400 clamp(2.1rem,4.35vw,3.8rem)/1 var(--sans);
+  font:400 clamp(2.1rem,4.35vw,3.8rem)/1 var(--hand);
   letter-spacing:-.035em;
   color:var(--route-blue);
 }
