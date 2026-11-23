@@ -335,6 +335,10 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   opacity: var(--market-neon, 0);
 }
 [data-street-lit] .market-neon { background-image: url("assets/pike-market-neon.webp"); }
+/* These details share the panorama's ground and buildings. Keep their boxes
+   measurable for lazy loading, and let the flag use its own opening backdrop. */
+[data-street-navigation-ready] .city-painted-world:not([data-painted]) ~ * { opacity: 0; }
+[data-street-navigation-ready] .opening-facades > .city-painted-world:not([data-painted]) ~ .needle-banner { opacity: 1; }
 .city-painted-world:not([data-painted]) ~ :is(.street-window-lights, .market-neon, .space-needle-lights),
 .opening-facades :is(.street-window-lights, .market-neon, .space-needle-lights) { visibility: hidden; }
 .city-stage.opening-facades::before {

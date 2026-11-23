@@ -234,11 +234,12 @@
     const index = routeIndex(link.hash);
     if (index < 0) return;
     event.preventDefault();
-    const focus = event.detail === 0 || link.hash !== '#' + stops[index].id && link.hash !== '#home';
+    const focus = event.detail === 0 || Boolean(link.closest('.street-stop')) ||
+      link.hash !== '#' + stops[index].id && link.hash !== '#home';
     navigate(index, {push:true, focus, hash:link.hash});
   });
-  stepButtons.forEach(button => button.addEventListener('click', () =>
-    step(button.dataset.step === 'prev' ? -1 : 1)));
+  stepButtons.forEach(button => button.addEventListener('click', event =>
+    step(button.dataset.step === 'prev' ? -1 : 1, event.detail === 0)));
 
   let tabbing = false;
   document.addEventListener('keydown', event => {
