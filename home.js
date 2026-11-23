@@ -40,25 +40,27 @@ const projects = {
     tech: "TypeScript · React · Chrome Extension API · Firebase · Azure Storage",
     links: [{text: "View GitHub repository", url: "https://github.com/AryanV08/CookiesShallNotPass"}]
   },
-  "file-search": {
-    name: "File System Search Engine",
-    category: "SYSTEMS · SEARCH · HTTP",
-    role: "Software Project · June–August 2025",
-    intro: "I started with a command-line tool for searching local files, then added a C++ server so it could answer queries over HTTP.",
-    points: [
-      ["Crawl & index", "I read files from directories and built an index using hash tables and linked lists."],
-      ["Query & serve", "The search ranks multi-word queries by word frequency. A multithreaded server returns the results over HTTP."],
-      ["Testing & security", "I added checks against XSS and directory traversal, then used unit tests and Valgrind to check the code."]
-    ],
-    tech: "C · C++ · Git · HTTP · Unit testing · Valgrind",
-    links: []
+  "happy-massage": {
+    name: "Happy Massage",
+    role: "Web Design & Development",
+    intro: "I helped design and build a multilingual website for Happy Massage in Silverdale, Washington. We built the treatment menu in HTML so clients can check prices even with JavaScript turned off.",
+    image: {
+      src: "assets/happy-massage-preview.jpg",
+      width: 1280,
+      height: 720,
+      alt: "Happy Massage homepage with a watercolor reception desk and a handwritten hello"
+    },
+    tech: "HTML · CSS · JavaScript · SVG",
+    links: [{text: "Visit Happy Massage", url: "https://www.happymassage.net/"}]
   }
 };
 const projectDialog = $('#project-dialog');
 let lastTrigger = null;
 
 function openProject(project, trigger) {
-  $('#dialog-category').textContent = project.category;
+  const category = $('#dialog-category');
+  category.textContent = project.category || '';
+  category.hidden = !project.category;
   $('#dialog-title').textContent = project.name;
   $('#dialog-role').textContent = project.role;
   const content = $('#dialog-content');
@@ -76,19 +78,22 @@ function openProject(project, trigger) {
     if (project.image.className) image.classList.add(project.image.className);
     content.append(image);
   }
-  const list = document.createElement('ul');
-  list.className = 'dialog-list';
-  for (const [title, description] of project.points) {
-    const item = document.createElement('li');
-    const label = document.createElement('strong');
-    label.textContent = title + '. ';
-    item.append(label, document.createTextNode(description));
-    list.append(item);
+  if (project.points?.length) {
+    const list = document.createElement('ul');
+    list.className = 'dialog-list';
+    for (const [title, description] of project.points) {
+      const item = document.createElement('li');
+      const label = document.createElement('strong');
+      label.textContent = title + '. ';
+      item.append(label, document.createTextNode(description));
+      list.append(item);
+    }
+    content.append(list);
   }
   const tech = document.createElement('p');
   tech.className = 'dialog-tech';
   tech.textContent = project.tech;
-  content.append(list, tech);
+  content.append(tech);
   const links = $('#dialog-links');
   links.replaceChildren();
   const resume = {text:'View résumé', url:'assets/dave-guo-resume.pdf?v=8358a15dab'};
