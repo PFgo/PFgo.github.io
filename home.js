@@ -96,7 +96,7 @@ function openProject(project, trigger) {
   content.append(tech);
   const links = $('#dialog-links');
   links.replaceChildren();
-  const resume = {text:'View résumé', url:'assets/dave-guo-resume.pdf?v=8358a15dab'};
+  const resume = {text:'View résumé', url:'assets/dave-guo-resume.pdf?v=dcabc63e05'};
   for (const link of [...project.links, resume]) {
     const anchor = document.createElement('a');
     anchor.className = link === resume ? 'button subtle' : 'button blue';
