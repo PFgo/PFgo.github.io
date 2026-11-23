@@ -305,7 +305,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   width: calc(4 * var(--block-width)); pointer-events: none; --walk-baseline: 1.5%;
 }
 .city-painted-world { display: block; width: 100%; height: 100%; max-width: none; }
-.city-painted-world, .opening-facades::before, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
+#market-clock, .city-painted-world, .opening-facades::before, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
   filter: brightness(var(--street-light, 1)) saturate(var(--street-saturation, 1));
 }
 /* The light maps register to the original 8400 × 724 painting, including its mobile stretch. */
