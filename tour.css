@@ -27,50 +27,89 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: var(--shell-top) minmax(0,1fr) calc(var(--shell-foot) + env(safe-area-inset-bottom));
 }
-/* Paint the sky once and slide it behind the walk. */
+/* Keep the light on the horizon while the watercolor clouds move behind the street. */
 .sky-window {
+  --sky-wash: linear-gradient(174deg, var(--sky-zenith, #84bce0), var(--sky-mid, #c8e3f4) 53%, var(--sky-horizon, #f6f2df) 90%);
   position: absolute;
   inset: 0 0 calc(var(--shell-foot) + env(safe-area-inset-bottom));
   z-index: -1;
+  isolation: isolate;
   overflow: hidden;
   pointer-events: none;
+  background: var(--sky-wash);
 }
 .tour-sky {
   --sky-overhang: max(25vw, calc(48rem - 100vw));
   width: calc(100% + var(--sky-overhang));
   height: 100%;
-  position: relative;
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: url('assets/sky-watercolor.webp') center 42% / cover no-repeat;
+  mix-blend-mode: soft-light;
+  opacity: var(--sky-cloud-alpha, .74);
   transform: translate3d(calc(var(--sky-overhang) * (-.22 - .56 * var(--tour-progress, 0))), 0, 0);
 }
-.tour-sky::before, .tour-sky::after {
+.sky-window::before, .sky-window::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
-.tour-sky::before {
-  background-image: linear-gradient(to bottom, #fbfaf359, #fbfaf317 48%, #faf8f11f), url('assets/sky-day.webp');
-  opacity: .60;
+.sky-window::before {
+  color: #eef0e1;
+  opacity: var(--sky-star-alpha, 0);
+  background:
+    radial-gradient(circle at 10% 18%, currentColor .65px, transparent 1.2px),
+    radial-gradient(circle at 17% 15%, currentColor 1px, transparent 1.4px),
+    radial-gradient(circle at 24% 29%, currentColor .6px, transparent 1.3px),
+    radial-gradient(circle at 34% 11%, currentColor .7px, transparent 1.3px),
+    radial-gradient(circle at 37% 25%, currentColor .5px, transparent 1px),
+    radial-gradient(circle at 49% 17%, currentColor .7px, transparent 1.3px),
+    radial-gradient(circle at 64% 10%, currentColor .9px, transparent 1.5px),
+    radial-gradient(circle at 73% 24%, currentColor .65px, transparent 1.2px),
+    radial-gradient(circle at 81% 14%, currentColor .7px, transparent 1.2px),
+    radial-gradient(circle at 93% 36%, currentColor .7px, transparent 1.2px);
 }
-.tour-sky::after {
-  background-image: linear-gradient(to bottom, #0c0e12 0%, #0c0e12ef 17%, #10121de0 32%, #191a2fb5 47%, #24213a52 64%, #2e22351c 77%, transparent 91%), url('assets/sky-afterglow.webp');
-  opacity: 0;
-}
-.dark .tour-sky::before { opacity: 0; }
-.dark .tour-sky::after { opacity: 1; }
-@media (prefers-reduced-motion: no-preference) {
-  .tour-sky::before, .tour-sky::after { transition: opacity .45s ease-in-out; }
+.sky-window::after {
+  opacity: var(--sky-cloud-alpha, .74);
+  background:
+    radial-gradient(ellipse 37% 7% at 106% 43%, color-mix(in srgb, var(--sky-cloud, #fff8e8) 73%, transparent), transparent 95%),
+    radial-gradient(ellipse 24% 5% at 2% 59%, color-mix(in srgb, var(--sky-cloud, #fff8e8) 54%, transparent), transparent),
+    radial-gradient(ellipse 42% 7% at 64% 75%, color-mix(in srgb, var(--sky-glow, #fff3d0) 39%, transparent), transparent);
 }
 @media (prefers-reduced-motion: reduce) {
   .tour-sky { transform: translateX(calc(-.22 * var(--sky-overhang))); }
 }
 .tour-header, .route-footer { position: relative; z-index: 3; padding-inline: var(--tour-gutter); }
 .tour-header {
+  --route-blue: var(--nav-blue, #244ccc);
+  --route-ink: var(--nav-ink, #29475f);
+  --route-muted: var(--nav-muted, #394c59);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   color: var(--route-ink);
+}
+.tour-header::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 -40%;
+  pointer-events: none;
+  background: linear-gradient(var(--nav-wash, transparent) 40%, transparent);
+}
+.street-stop :is(.about-letter, .market-content, .pier-notes, .harbor-contact) {
+  position: relative;
+  isolation: isolate;
+}
+.street-stop :is(.about-letter, .market-content, .pier-notes, .harbor-contact)::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 24%;
+  background: var(--reading-wash, transparent);
+  filter: blur(clamp(18px, 3vw, 42px));
 }
 .city-label, .place-name, .direction { display: flex; align-items: center; gap: .65rem; }
 .city-label { justify-self: start; font-size: 1.18rem; }
@@ -96,7 +135,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 .route-nav a[href="#work"] { min-inline-size: 3.9em; }
 .route-nav a[href="#experience"] { min-inline-size: 5.3em; }
 .route-nav a[href="#contact"] { min-inline-size: 2.9em; }
-.route-nav a.is-current, .route-nav a:hover, .city-label:hover { color: var(--route-blue); font-family: var(--hand); }
+.route-nav a.is-current, .route-nav a:hover { color: var(--route-blue); font-family: var(--hand); }
 .route-nav a.is-current::after { transform: rotate(-3deg) scaleX(1); }
 #street-rail {
   position: relative;
@@ -142,6 +181,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 .about-letter .hero-ctas { justify-content: center; gap: .55rem; }
 .about-letter .hero-ctas .button { min-height: 42px; font-size: 1.02rem; padding: .45rem 1.22rem; }
 .about-letter .hero-ctas .work-button { color: var(--route-blue); font-family: var(--hand); }
+.about-letter .hero-ctas .resume-button { color: var(--route-ink); }
 .street-title { font: 400 clamp(2.2rem, 4.5vw, 3.75rem)/1.05 var(--hand); color: var(--route-blue); margin: 0; }
 .pier-notes { width: min(92%, 43rem); text-align: center; }
 .pier-notes .street-title { font-size: clamp(2rem, 3.7vw, 3.2rem); }
@@ -163,6 +203,8 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 .harbor-contact .contact-display:is(:hover,:focus-visible) { border-color: var(--route-blue); }
 .bay-stop .scene-reading { padding-bottom: 2.2rem; }
 .route-footer {
+  --route-ink: var(--ink);
+  --route-muted: var(--muted);
   display: grid;
   grid-template-columns: minmax(0,1fr) auto; gap: 1.25rem; align-items: center;
   padding-bottom: env(safe-area-inset-bottom); color: var(--route-ink);
@@ -263,7 +305,43 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   width: calc(4 * var(--block-width)); pointer-events: none; --walk-baseline: 1.5%;
 }
 .city-painted-world { display: block; width: 100%; height: 100%; max-width: none; }
-.city-stage.opening-facades {
+.city-painted-world, .opening-facades::before, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
+  filter: brightness(var(--street-light, 1)) saturate(var(--street-saturation, 1));
+}
+/* The light maps register to the original 8400 × 724 painting, including its mobile stretch. */
+.street-window-lights, .market-neon, .space-needle-lights {
+  position: absolute;
+  pointer-events: none;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.street-window-lights { inset: 0; }
+[data-street-lit] .street-window-lights {
+  background-image: url("assets/street-window-lights.webp");
+}
+[data-window-twilight] .street-window-lights {
+  --light-falloff: linear-gradient(to bottom, rgb(0 0 0 / var(--upper-light)) 50%, rgb(0 0 0 / var(--shop-light)) 78%);
+  -webkit-mask-image: var(--light-falloff);
+  mask-image: var(--light-falloff);
+}
+/* Crop (1436, 8, 192, 308) follows the deck, mast and legs of the painted tower. */
+.space-needle-lights {
+  left: 17.095238%; top: 1.104972%; width: 2.285714%; height: 42.541436%;
+  opacity: var(--landmark-light, 0);
+}
+[data-street-lit] .space-needle-lights { background-image: url("assets/space-needle-lights.webp"); }
+.market-neon {
+  left: 27.559524%; top: -3.038674%; width: 8.047619%; height: 76.519337%;
+  opacity: var(--market-neon, 0);
+}
+[data-street-lit] .market-neon { background-image: url("assets/pike-market-neon.webp"); }
+.city-painted-world:not([data-painted]) ~ :is(.street-window-lights, .market-neon, .space-needle-lights),
+.opening-facades :is(.street-window-lights, .market-neon, .space-needle-lights) { visibility: hidden; }
+.city-stage.opening-facades::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background: url("assets/opening-facades.webp") left bottom / 62.5% 100% no-repeat;
 }
 .campus-conversation {
@@ -445,7 +523,12 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   object-fit: cover;
 }
 .bio-story { margin: 0; }
-.bio-story + .bio-story { margin-top: .4em; }
+.bio-education {
+  margin-top: .8em;
+  font-size: .85em;
+  line-height: 1.55;
+  color: var(--route-muted);
+}
 .bio-story .school-name {
   display: inline-flex;
   align-items: center;
@@ -500,7 +583,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
     font-size: clamp(1.05rem, 3dvh, 1.3rem);
     line-height: 1.28;
   }
-  .bio-story + .bio-story { margin-top: .32em; }
+  .bio-education { margin-top: .4em; }
   .about-letter .hero-ctas .button { min-height: 36px; }
 }
 

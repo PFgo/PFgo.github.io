@@ -39,6 +39,7 @@
     h: 'M30 -66 Q24 -45 12 -7|M14 -14 Q32 -39 41 -31 C48 -28 34 -17 44 -8',
     '.': 'M14 -12 l-1 4'
   };
+  const forcedColors = matchMedia('(forced-colors: active)');
   const glyphs = new Map();
   function glyphFor(drawing) {
     if (!glyphs.has(drawing)) {
@@ -179,8 +180,6 @@
       // Keep the same rhythm for short greetings and cap the wait for long titles.
       const duration = Math.min(3200, penTime * 1.85);
       const began = performance.now();
-      let dark = document.body.classList.contains('dark');
-      let color = style.color;
       function paint(now) {
         if (stop.dataset.inkArrived !== 'playing') return;
         const at = (now - began) * penTime / duration;
@@ -191,10 +190,11 @@
           heading.dispatchEvent(new Event('street-title-written', {bubbles:true}));
           return;
         }
-        const night = document.body.classList.contains('dark');
-        if (night !== dark) { dark = night; color = getComputedStyle(heading).color; }
         const active = pictures[word];
-        if (at >= active.start) active.draw(at, color);
+        if (at >= active.start) {
+          const ink = forcedColors.matches ? style.color : document.body.style.getPropertyValue('--route-blue');
+          active.draw(at, ink || style.color);
+        }
         requestAnimationFrame(paint);
       }
       requestAnimationFrame(paint);

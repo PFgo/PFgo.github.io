@@ -3,7 +3,12 @@
   const wheel = document.querySelector('.harbor-wheel');
   if (!wheel) return;
   const canvas = wheel.querySelector('canvas');
-  let context;
+  const poster = wheel.querySelector('img');
+  const lamps = document.createElement('canvas');
+  lamps.className = 'wheel-lights';
+  lamps.hidden = true;
+  wheel.append(lamps);
+  let context, lampContext;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const stage = wheel.closest('.city-stage');
   const period = 122000;
@@ -13,15 +18,20 @@
   const pivot = {x: 705, y: 286};
   const base = new URL('assets/', document.baseURI);
   let phase = 0, request = 0, timer = 0, previous = 0;
-  let ready = false, loading = false;
+  const loading = new Set();
   const materials = {};
   const rings = new Map();
-  const load = name => new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => { materials[name] = image; resolve(); };
-    image.onerror = reject;
-    image.src = new URL('wheel-' + name + '.webp', base);
-  });
+  function haveMaterials(names) {
+    for (const name of names) {
+      if (materials[name] || loading.has(name)) continue;
+      loading.add(name);
+      const image = new Image();
+      image.onload = () => { materials[name] = image; loading.delete(name); sync(); };
+      image.onerror = () => loading.delete(name);
+      image.src = new URL('wheel-' + name + '.webp', base);
+    }
+    return names.every(name => materials[name]);
+  }
 
   // A slightly oblique projection matches the original off-center spindle.
   // Keeping cabins upright in screen space separates gravity from wheel angle.
@@ -30,7 +40,7 @@
     const depth = 1 + projection * u;
     return {x: pivot.x + 193 * u / depth, y: pivot.y + 213 * v / depth, depth};
   }
-  function ring(radius, color, width) {
+  function ring(radius, color, width, target = context) {
     if (!rings.has(radius)) {
       const outline = new Path2D();
       for (let i = 0; i <= 112; i++) {
@@ -41,9 +51,9 @@
       outline.closePath();
       rings.set(radius, outline);
     }
-    context.strokeStyle = color;
-    context.lineWidth = width;
-    context.stroke(rings.get(radius));
+    target.strokeStyle = color;
+    target.lineWidth = width;
+    target.stroke(rings.get(radius));
   }
   function beam(to, width) {
     const dx = to.x - pivot.x, dy = to.y - pivot.y;
@@ -82,6 +92,48 @@
     context.fill();
     context.drawImage(materials.foreground,454,52,450,475);
   }
+  function paintLights() {
+    const sx = lamps.width / 450, sy = lamps.height / 475;
+    lampContext.setTransform(sx,0,0,sy,-454*sx,-52*sy);
+    lampContext.clearRect(454,52,450,475);
+    ring(.998, 'rgba(138,208,255,.29)', 10, lampContext);
+    ring(.998, 'rgba(205,234,255,.83)', 2.2, lampContext);
+    const rim = new Path2D(), spokes = new Path2D(), strips = new Path2D();
+    function bulb(path, angle, radius, size) {
+      const p = project(angle, radius);
+      const r = size / p.depth;
+      path.moveTo(p.x + r, p.y);
+      path.arc(p.x, p.y, r, 0, tau);
+    }
+    for (let i = 0; i < count; i++) {
+      const angle = i * tau / count + phase;
+      bulb(rim, angle, .998, 3.15);
+      bulb(rim, angle + tau / (count * 2), .998, 1.9);
+      if (i % 4 === 0) {
+        const inner = project(angle, .16), outer = project(angle, .91);
+        strips.moveTo(inner.x, inner.y);
+        strips.lineTo(outer.x, outer.y);
+      }
+      if (i % 2 === 0) {
+        for (const radius of [.24,.42,.60,.78,.91]) bulb(spokes, angle, radius, 2.3);
+      }
+    }
+    lampContext.strokeStyle = 'rgba(178,220,255,.73)';
+    lampContext.lineWidth = 1.75;
+    lampContext.stroke(strips);
+    lampContext.strokeStyle = 'rgba(129,200,255,.34)';
+    lampContext.lineWidth = 4;
+    lampContext.stroke(rim);
+    lampContext.stroke(spokes);
+    lampContext.fillStyle = '#fff3d7';
+    lampContext.fill(rim);
+    lampContext.fillStyle = '#d2edff';
+    lampContext.fill(spokes);
+    // Keep the footings, pier roof and lamppost in front of the lit rotor.
+    lampContext.globalCompositeOperation = 'destination-out';
+    lampContext.drawImage(materials.foreground,454,52,450,475);
+    lampContext.globalCompositeOperation = 'source-over';
+  }
   function active() {
     return !document.hidden && !reduced.matches &&
       !stage?.hasAttribute('data-street-paused') && !wheel.hasAttribute('data-out-of-view');
@@ -92,6 +144,7 @@
     if (previous) phase = (phase + Math.min(250, time-previous) * tau / period) % tau;
     previous = time;
     paint();
+    if (!lamps.hidden) paintLights();
     // The wheel takes two minutes per turn. Wake just before its next frame.
     timer = setTimeout(() => { request=requestAnimationFrame(tick); }, 40);
   }
@@ -102,35 +155,44 @@
   }
   function sync() {
     stop();
-    if (!active()) return;
-    if (!ready) {
-      if (loading) return;
-      context ||= canvas.getContext('2d');
-      if (!context) return;
-      loading = true;
-      Promise.all(['cabin','spoke','foreground'].filter(name=>!materials[name]).map(load))
-        .then(() => { ready=true; sync(); })
-        .catch(() => { loading=false; });
-      return;
-    }
+    if (document.hidden || wheel.hasAttribute('data-out-of-view')) return;
+    const moving = active();
+    const lit = document.body.hasAttribute('data-street-lit');
+    if (!lit) lamps.hidden = true;
+    const showRotor = (moving || !canvas.hidden) && haveMaterials(['cabin','spoke','foreground']);
+    const showLights = lit && haveMaterials(['foreground']);
+    if (!showRotor && !showLights) return;
     const bounds = wheel.getBoundingClientRect();
     if (!bounds.width || !bounds.height) return;
     // Match the displayed patch and available texture detail on each screen.
     const ratio = window.devicePixelRatio || 1;
     const width = Math.min(675, Math.max(1, Math.round(bounds.width*ratio)));
     const height = Math.min(713, Math.max(1, Math.round(bounds.height*ratio)));
-    if (canvas.width !== width) canvas.width=width;
-    if (canvas.height !== height) canvas.height=height;
-    paint();
-    canvas.hidden=false;
-    const poster = wheel.querySelector('img');
-    if (poster) poster.hidden=true;
-    previous=performance.now();
-    timer=setTimeout(() => { request=requestAnimationFrame(tick); }, 40);
+    if (showRotor && (context ||= canvas.getContext('2d'))) {
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
+      paint();
+      canvas.hidden = false;
+      if (poster) poster.hidden = true;
+      if (moving) {
+        previous=performance.now();
+        timer=setTimeout(() => { request=requestAnimationFrame(tick); }, 40);
+      }
+    }
+    // A cold or slow connection can deliver the lamp mask before the wheel underneath.
+    const wheelVisible = !canvas.hidden || (poster?.complete && poster.naturalWidth > 0);
+    if (showLights && wheelVisible && (lampContext ||= lamps.getContext('2d'))) {
+      if (lamps.width !== width) lamps.width = width;
+      if (lamps.height !== height) lamps.height = height;
+      paintLights();
+      lamps.hidden = false;
+    }
   }
+  poster?.addEventListener('load', sync, {once:true});
   const observer=new MutationObserver(sync);
   if (stage) observer.observe(stage,{attributes:true,attributeFilter:['data-street-paused']});
   observer.observe(wheel,{attributes:true,attributeFilter:['data-out-of-view']});
+  observer.observe(document.body,{attributes:true,attributeFilter:['data-street-lit']});
   reduced.addEventListener('change',sync);
   document.addEventListener('visibilitychange',sync);
   if ('ResizeObserver' in window) new ResizeObserver(sync).observe(wheel);

@@ -88,6 +88,7 @@
   height: 65.60773481%;
 }
 .harbor-wheel img, .harbor-wheel canvas { display:block; width:100%; height:100%; }
+.harbor-wheel .wheel-lights { position: absolute; inset: 0; opacity: var(--landmark-light, 0); }
 .harbor-wheel [hidden] { display:none; }
 
 /* The painted clock's spindle sits at (2939.5, 227.5) in the 8400 × 724 street. */
