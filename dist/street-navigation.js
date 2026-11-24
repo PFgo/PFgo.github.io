@@ -8,6 +8,10 @@
   const stepButtons = Array.from(document.querySelectorAll('button[data-step]'));
   const locationLabel = document.getElementById('street-location');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  // On phones a finger scroll runs at the display's own rate (120Hz on ProMotion
+  // iPhones), but a script-driven glide is held to 60fps there. Route trips use the
+  // browser's smooth scroll instead, so they move like the visitor's own swipe.
+  const touchPhone = matchMedia('(hover: none) and (pointer: coarse)');
   const sky = document.querySelector('.tour-sky');
   const greeting = stops[0].querySelector('.tour-heading');
   const greetingReader = greeting.closest('.stop-scroll');
@@ -21,6 +25,9 @@
   let openingHoldsGreeting = false;
   let destination = null;
   let routeFrame = 0;
+  // A native smooth scroll toward `destination` is in progress (see touchPhone).
+  let nativeGlide = false;
+  let nativeTarget = 0;
   let frame = 0;
   let settleTimer = 0;
   let wheelFrame = 0;
@@ -93,7 +100,7 @@
   }
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && routeFrame) navigate(destination, {instant:true});
+    if (document.hidden && (routeFrame || nativeGlide)) navigate(destination, {instant:true});
     for (const stop of stops) {
       if (stop.dataset.inkArrived === 'playing') watchPen(stop);
     }
@@ -185,6 +192,22 @@
 
   function settle() {
     clearTimeout(settleTimer);
+    if (nativeGlide && Math.abs(rail.scrollLeft - offsets[destination]) > 1.5) {
+      // The browser stopped short (a touch took over). End the trip where the
+      // street came to rest, once it has stayed there.
+      const restingAt = rail.scrollLeft;
+      settleTimer = setTimeout(() => {
+        if (nativeGlide && rail.scrollLeft === restingAt) {
+          cancelRoute();
+          settle();
+        }
+      }, 250);
+      return;
+    }
+    if (nativeGlide) {
+      nativeGlide = false;
+      rail.removeAttribute('data-route-gliding');
+    }
     // Instant writes during a translated wheel glide can each emit scrollend.
     if (resizePosition !== null || wheelTarget !== null || routeFrame ||
         destination !== null && Math.abs(rail.scrollLeft - offsets[destination]) > 1.5) return;
@@ -237,6 +260,7 @@
   function cancelRoute() {
     cancelAnimationFrame(routeFrame);
     routeFrame = 0;
+    nativeGlide = false;
     destination = null;
     rail.removeAttribute('data-route-gliding');
   }
@@ -264,6 +288,14 @@
     if (instant || document.hidden || reducedMotion.matches || Math.abs(distance) <= 1) {
       rail.scrollTo({left:offsets[index], behavior:'instant'});
       settle();
+      return;
+    }
+    if (touchPhone.matches) {
+      // settle() ends the trip when the browser's smooth scroll arrives.
+      nativeGlide = true;
+      nativeTarget = offsets[index];
+      rail.setAttribute('data-route-gliding', '');
+      rail.scrollTo({left:nativeTarget, behavior:'smooth'});
       return;
     }
     // Use the same camera timing in Safari and Chrome. Longer trips get
@@ -357,7 +389,7 @@
     tabbing = false;
     endResize();
     cancelWheel();
-    if (rail.contains(event.target) && routeFrame) {
+    if (rail.contains(event.target) && (routeFrame || nativeGlide)) {
       cancelRoute();
       settle();
     }
@@ -378,7 +410,7 @@
     // Let the browser carry horizontal trackpad momentum and touch scrolling
     // on the rail. The header and footer have no horizontal scroller of their own.
     endResize();
-    if (routeFrame) {
+    if (routeFrame || nativeGlide) {
       cancelRoute();
       settle();
     }
@@ -416,7 +448,7 @@
   }, {passive:true});
   if (nativeScrollEnd) rail.addEventListener('scrollend', settle);
   reducedMotion.addEventListener('change', () => {
-    if (reducedMotion.matches && routeFrame) navigate(destination, {instant:true});
+    if (reducedMotion.matches && (routeFrame || nativeGlide)) navigate(destination, {instant:true});
     if (!frame) frame = requestAnimationFrame(paint);
   });
   window.addEventListener('popstate', onHistory);
@@ -443,8 +475,13 @@
     // A mobile browser may change viewport height mid-gesture. Keep the same
     // point between landmarks throughout the resize, including scroll events
     // the browser generates while it clamps the old viewport's offset.
-    if (routeFrame) {
+    if (routeFrame || nativeGlide) {
       measure();
+      // Keep a native trip aimed at its stop as the layout changes.
+      if (nativeGlide && Math.abs(offsets[destination] - nativeTarget) > 1) {
+        nativeTarget = offsets[destination];
+        rail.scrollTo({left:nativeTarget, behavior:'smooth'});
+      }
       return;
     }
     resizePosition ??= destination ?? routePosition;
