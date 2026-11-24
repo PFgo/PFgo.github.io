@@ -648,6 +648,14 @@ html[data-opening-pending]:not([data-street-navigation-ready]) .sky-window { ins
   }
   /* The cloth changes shape every frame while the street behind it is a still painting. */
   [data-street-opening] .needle-banner { will-change: transform; }
+  /* A walker crossing into the frame mid-zoom brings new composited layers for its
+     limbs, and Chrome drops a frame to raster them. Let the traffic step in once the
+     camera settles. */
+  [data-street-opening] .street-traffic { display: none; }
+  [data-street-navigation-ready]:not([data-street-opening]) .street-traffic {
+    animation: street-traffic-arrives .6s ease-out;
+  }
+  @keyframes street-traffic-arrives { from { opacity: 0; } }
   [data-street-opening] #about h1 {
     animation-name: opening-greeting;
     animation-delay: calc(var(--opening-hold) + var(--opening-travel) * .55);
