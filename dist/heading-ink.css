@@ -23,6 +23,12 @@
   [data-ink-arrived="playing"] .resume-note {
     animation: street-note-arrives .48s ease-out .23s backwards;
   }
+  /* The notes fade in while the street is still gliding. Give them their own
+     layers up front: one created mid-glide (with its logos to decode) cost
+     Chrome a frame on narrow windows, where the next stop starts far off screen. */
+  [data-street-navigation-ready] :is(.market-loaves, .notebook, .resume-note, .harbor-contact .contact-links) {
+    will-change: opacity, transform;
+  }
   @keyframes street-note-arrives {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
