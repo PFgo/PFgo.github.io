@@ -81,14 +81,20 @@
 #market-clock[data-clock-ready][data-dial-ready] { visibility: visible; }
 
 /* The mast meets the painted spire at (1533, 48) in the 8400 × 724 panorama. */
-.needle-banner {
+.needle-banner, .needle-banner-canvas {
   position: absolute;
   left: 18.25%;
   top: 6.63%;
+}
+.needle-banner {
   width: var(--needle-width, clamp(118px, 12vw, 178px));
   height: auto;
   overflow: visible;
   transform: translate(-1.65%, -100%);
 }
+/* home.js sizes the worker-painted flag over the SVG's box. Once its first frame
+   is on screen the SVG only holds the layout. */
+.needle-banner-canvas { pointer-events: none; }
+.needle-banner[data-canvas-cloth] { visibility: hidden; }
 .banner-title { font: 500 22px var(--sans); }
 html:not([data-street-navigation-ready]) .needle-banner { width: 12%; }

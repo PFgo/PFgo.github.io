@@ -179,6 +179,204 @@ let fountainAtlas;
 let fountainContext;
 let fountainFrame = 0;
 let fountainTimer;
+let flagCloth = startFlagCloth();
+
+// The flag's cloth reshapes every frame. As SMIL it relays out its lettering and
+// repaints on the main thread, which the opening camera needs for itself. Where a
+// canvas can be painted in a worker, draw the same artwork there instead. The inline
+// SVG stays the layout box, the picture without scripts and the SMIL fallback.
+function startFlagCloth() {
+  if (!needleBanner || reducedMotion.matches || typeof Worker !== 'function' ||
+      !('transferControlToOffscreen' in HTMLCanvasElement.prototype)) return null;
+  const art = readFlagArt();
+  if (!art) return null;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'needle-banner-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  let offscreen;
+  try {
+    needleBanner.after(canvas);
+    offscreen = canvas.transferControlToOffscreen();
+  } catch {
+    canvas.remove();
+    return null;
+  }
+  const worker = new Worker('flag-worker.js?v=bb3b1eeaa9');
+  let resolution;
+
+  // Cover the SVG's box plus a margin for strokes, at the size it is shown on
+  // screen. During the opening that includes the camera's magnification.
+  function layout() {
+    const style = getComputedStyle(needleBanner);
+    const width = parseFloat(style.width), height = parseFloat(style.height);
+    const unit = width / art.viewWidth;
+    const shift = new DOMMatrix(style.transform);
+    const margin = art.pad * unit;
+    canvas.style.width = width + 2 * margin + 'px';
+    canvas.style.height = height + 2 * margin + 'px';
+    canvas.style.transform = `translate(${shift.e - margin}px, ${shift.f - margin}px)`;
+    const shown = needleBanner.getBoundingClientRect().width;
+    const ratio = window.devicePixelRatio || 1;
+    return Math.min(16, unit * ratio * Math.max(1, shown / width || 1));
+  }
+  function update() {
+    if (!flagCloth) return;
+    worker.postMessage({unit: layout()});
+    watchResolution();
+  }
+  function watchResolution() {
+    const ratio = window.devicePixelRatio || 1;
+    if (ratio === resolution) return;
+    resolution = ratio;
+    matchMedia(`(resolution: ${ratio}dppx)`).addEventListener('change', update, {once:true});
+  }
+  const resize = new ResizeObserver(update);
+  function fallBack() {
+    if (!flagCloth) return;
+    flagCloth = null;
+    worker.terminate();
+    resize.disconnect();
+    document.removeEventListener('street-opening-end', update);
+    canvas.remove();
+    needleBanner.removeAttribute('data-canvas-cloth');
+    syncBanner();
+  }
+  worker.onmessage = ({data}) => {
+    // Swap only once the canvas holds the same first frame as the SVG.
+    if (data.type === 'ready') needleBanner.setAttribute('data-canvas-cloth', '');
+    if (data.type === 'failed') fallBack();
+  };
+  worker.onerror = fallBack;
+  worker.postMessage({type:'init', canvas:offscreen, art, unit:layout()}, [offscreen]);
+  resize.observe(needleBanner);
+  document.addEventListener('street-opening-end', update);
+  watchResolution();
+  return {
+    play(playing) { worker.postMessage({playing}); }
+  };
+}
+
+// A drawing list for flag-worker.js: the animated outlines from the SMIL
+// keyframes, plus every painted element in source order with its computed style.
+function readFlagArt() {
+  const view = needleBanner.viewBox.baseVal;
+  const motions = Array.from(needleBanner.querySelectorAll('[data-breeze]'));
+  const tracks = {};
+  let duration = 0;
+  for (const motion of motions.filter(m => m.getAttribute('attributeName') === 'd')) {
+    tracks[motion.parentElement.id] = motion.getAttribute('values').split(';').map(v => v.trim()).filter(Boolean);
+    duration = parseFloat(motion.getAttribute('dur')) * 1000;
+  }
+  const shimmer = motions.find(m => m.getAttribute('attributeName') === 'gradientTransform');
+  const cloth = shimmer?.parentElement;
+  if (!duration || !cloth || cloth.hasAttribute('gradientUnits')) return null;
+  const gradient = {
+    id: cloth.id,
+    x1: parseFloat(cloth.getAttribute('x1') ?? 0),
+    x2: parseFloat(cloth.getAttribute('x2') ?? 1),
+    reflect: cloth.getAttribute('spreadMethod') === 'reflect',
+    from: parseFloat(shimmer.getAttribute('from')),
+    to: parseFloat(shimmer.getAttribute('to')),
+    duration: parseFloat(shimmer.getAttribute('dur')) * 1000,
+    stops: Array.from(cloth.querySelectorAll('stop'), stop => ({
+      offset: parseFloat(stop.getAttribute('offset') ?? 0),
+      color: getComputedStyle(stop).stopColor
+    }))
+  };
+  const artwork = needleBanner.querySelector('.banner-facing');
+  const supported = new Set(['g', 'path', 'circle', 'use', 'text', 'textPath']);
+  const parts = Array.from(artwork.querySelectorAll('*'));
+  // Anything this renderer cannot draw keeps the SVG.
+  if (parts.some(part => !supported.has(part.localName))) return null;
+
+  function matrix(element) {
+    let total = new DOMMatrix();
+    for (let node = element; node && node !== needleBanner; node = node.parentElement) {
+      const list = node.transform?.baseVal;
+      let own = new DOMMatrix();
+      for (let i = 0; i < (list?.numberOfItems ?? 0); i++) {
+        const {a, b, c, d, e, f} = list.getItem(i).matrix;
+        own = own.multiply(new DOMMatrix([a, b, c, d, e, f]));
+      }
+      total = own.multiply(total);
+    }
+    return [total.a, total.b, total.c, total.d, total.e, total.f];
+  }
+  const ops = [];
+  for (const part of parts) {
+    const style = getComputedStyle(part);
+    if (part.localName === 'g' || part.localName === 'textPath') {
+      if (style.opacity !== '1' || style.filter !== 'none') return null;
+      continue;
+    }
+    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity !== '1' ||
+        style.fillOpacity !== '1' || style.strokeOpacity !== '1') return null;
+    let fill = style.fill === 'none' ? null : style.fill;
+    if (fill?.startsWith('url(')) {
+      if (!fill.includes('#' + gradient.id)) return null;
+      fill = 'gradient';
+    }
+    const op = {
+      matrix: matrix(part),
+      fill,
+      stroke: style.stroke === 'none' ? null : style.stroke,
+      width: parseFloat(style.strokeWidth),
+      join: style.strokeLinejoin,
+      cap: style.strokeLinecap,
+      dash: style.strokeDasharray === 'none' ? [] : style.strokeDasharray.split(/[\s,]+/).map(parseFloat)
+    };
+    if (part.localName === 'path') {
+      Object.assign(op, {kind:'path', d:part.getAttribute('d')});
+    } else if (part.localName === 'circle') {
+      Object.assign(op, {kind:'circle', cx:part.cx.baseVal.value, cy:part.cy.baseVal.value, r:part.r.baseVal.value});
+    } else if (part.localName === 'use') {
+      const id = part.getAttribute('href')?.slice(1);
+      if (!tracks[id]) return null;
+      Object.assign(op, {kind:'path', track:id});
+    } else {
+      const path = part.querySelector('textPath');
+      const id = path?.getAttribute('href')?.slice(1);
+      const offset = path?.getAttribute('startOffset') ?? '0%';
+      if (!tracks[id] || !offset.endsWith('%')) return null;
+      Object.assign(op, {
+        kind:'text', track:id, text:part.textContent, offset:parseFloat(offset) / 100, anchor:style.textAnchor,
+        font:`${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+      });
+    }
+    if (op.fill === 'gradient' && !op.track) return null;
+    ops.push(op);
+  }
+  const lettering = ops.find(op => op.kind === 'text');
+  const faces = lettering ? fontFaces(getComputedStyle(artwork.querySelector('text')).fontFamily) : [];
+  return {viewX:view.x, viewY:view.y, viewWidth:view.width, viewHeight:view.height, pad:4, duration, tracks, gradient, ops, faces};
+}
+
+// The @font-face rules for the families in a font stack, with absolute URLs,
+// so the worker can load the same faces the page uses.
+function fontFaces(stack) {
+  const unquote = name => name.trim().replace(/^(["'])(.*)\1$/, '$2');
+  const names = stack.split(',').map(unquote);
+  const faces = [];
+  for (const sheet of document.styleSheets) {
+    let rules;
+    try { rules = sheet.cssRules; } catch { continue; }
+    for (const rule of rules) {
+      if (!(rule instanceof CSSFontFaceRule)) continue;
+      const family = unquote(rule.style.getPropertyValue('font-family'));
+      if (!names.includes(family)) continue;
+      const base = sheet.href || document.baseURI;
+      const source = rule.style.getPropertyValue('src')
+        .replace(/url\((["']?)([^"')]+)\1\)/g, (match, quote, url) => `url("${new URL(url, base).href}")`);
+      const descriptor = name => rule.style.getPropertyValue(name).trim();
+      faces.push({family, source, descriptors: {
+        style: descriptor('font-style') || 'normal',
+        weight: descriptor('font-weight') || 'normal',
+        unicodeRange: descriptor('unicode-range') || 'U+0-10FFFF'
+      }});
+    }
+  }
+  return faces;
+}
 
 async function fetchFountain(priority) {
   fountainRequested = true;
@@ -298,8 +496,13 @@ for (const stop of streetRail.querySelectorAll('.street-stop')) {
 }
 
 function syncBanner() {
+  const halted = streetStage.hasAttribute('data-street-paused') || needleBanner?.hasAttribute('data-out-of-view');
+  if (flagCloth) {
+    flagCloth.play(!halted);
+    return;
+  }
   if (typeof needleBanner?.pauseAnimations !== 'function') return;
-  if (streetStage.hasAttribute('data-street-paused') || needleBanner.hasAttribute('data-out-of-view')) {
+  if (halted) {
     needleBanner.pauseAnimations();
     return;
   }
