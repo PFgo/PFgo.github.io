@@ -1,0 +1,743 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="8400" height="724" viewBox="0 0 8400 724">
+<g fill="white">
+<g>
+  <!-- The bookshop corner and the narrow shop at the edge of the block. -->
+  <path opacity=".78" d="M24 399V371 Q25 356 38 356 Q51 357 53 368V399Z M24 407H53V445H24Z"/>
+  <path d="M0 513H39V534H0Z M0 552H36V635H0Z"/>
+  <path d="M123 392V365 Q127 344 147 343 Q167 344 169 365V390Z M126 398L169 395V441L126 443Z"/>
+  <path opacity=".78" d="M192 385V354 Q197 337 216 336 Q236 337 239 354V384Z M192 393L239 389V437L192 440Z"/>
+  <path opacity=".70" d="M298 388V356 Q301 342 314 344 Q331 345 336 362V395Z M298 394L335 400V429L322 438L298 441Z"/>
+  <path d="M114 509L162 507V540L114 542Z M172 505L249 502V538L172 540Z M281 505L358 511V542L281 537Z"/>
+  <path d="M114 550L162 548V640H114Z M204 548L249 545V657L205 661Z M280 545L359 551V641H280Z"/>
+
+  <!-- The café under the striped awning. -->
+  <path opacity=".85" d="M446 389V369 Q448 345 471 345 Q493 345 497 369V389Z M446 397H497V416L479 416L446 424Z"/>
+  <path d="M547 390V371 Q549 346 573 345 Q597 345 600 371V390Z M547 397H600V421L581 417L555 424H547Z"/>
+  <path opacity=".78" d="M653 391V368 Q657 346 679 345 Q701 346 705 369V391Z M653 398H705V441H653Z"/>
+  <path d="M430 548H514V627H456L441 612L430 610Z M526 549H668V628H526Z M709 559H733V594L721 608V634H709Z"/>
+
+  <!-- The timber-front bay, flower shop and corner streetlamp. -->
+  <g transform="translate(700)">
+    <path opacity=".73" d="M105 309L119 303V335L106 340Z M106 348L119 343V380L106 386Z M106 394L119 389V431L106 436Z"/>
+    <path d="M141 302H181V331H141Z M141 339H181V378H141Z M142 386H181V430H142Z"/>
+    <path opacity=".68" d="M202 303L213 309V339L202 334Z M202 343L212 349V385L202 380Z M202 389L212 393V434L202 429Z"/>
+    <path opacity=".83" d="M281 414V397 Q282 376 302 375 Q322 375 327 396V414Z M281 421H327V460H281Z"/>
+    <path d="M376 414V395 Q380 375 398 375 Q418 375 423 395V414Z M376 421H423V460H376Z"/>
+    <path opacity=".77" d="M124 550L155 549V594L142 584L129 592L115 587Z"/>
+    <path d="M173 518H278V540H173Z M174 549H277V592L258 582L248 591L226 579L209 590L182 589L174 600Z"/>
+    <path d="M355 551H391V639H351V590Z M413 518H460V539H413Z M414 548H459V572L448 575L434 563L416 580Z"/>
+    <circle cx="527" cy="420" r="14"/><circle cx="499" cy="445" r="12"/><circle cx="555" cy="445" r="12"/>
+  </g>
+
+  <!-- Cream arcade and cafés at the base of the Space Needle. -->
+  <g transform="translate(1400)">
+    <path opacity=".78" d="M-92 430V409 Q-90 391 -75 391 Q-58 391 -56 408V430Z M-92 439H-56V477H-92Z"/>
+    <path d="M-16 431V409 Q-14 392 2 391 Q18 393 20 409V431Z M-16 440H20V477H-16Z"/>
+    <path opacity=".78" d="M59 431V410 Q61 391 77 391 Q93 391 94 410V431Z M59 439H94V478H59Z"/>
+    <path d="M139 431V408 Q142 391 157 391 Q173 391 175 409V431Z M139 439H175V477H139Z"/>
+    <path d="M-100 531H-33V550H-100Z M-100 558H-33V630H-100Z M-16 532H96V550H-16Z M-16 558H96V630H-16Z M116 532H185V550H116Z M116 559H185V593L169 589L156 603L143 593L124 600L116 594Z"/>
+    <path d="M250 448V431 Q250 421 259 420 Q268 421 268 431V448Z M250 456H268V481H250Z"/>
+    <path d="M320 433Q323 416 337 405V433Z M349 433V398Q365 390 384 397V433Z M395 405Q410 414 416 433H395Z M320 441H338V476H320Z M350 441H384V476H350Z M395 441H415V476H395Z"/>
+    <path opacity=".71" d="M460 448V431Q461 421 469 420Q477 421 478 431V444L469 446Z"/>
+    <path d="M323 531L383 529V545H323Z M332 557H382V634H332Z M400 558L414 553V633L400 637Z"/>
+    <path opacity=".7" d="M249 531H267V551H249Z M249 558H267V610L259 608L249 614Z M459 531H476V551H459Z"/>
+    <path opacity=".75" d="M82 109Q126 96 184 106L179 112Q135 104 88 116Z"/>
+  </g>
+
+  <!-- Red-brick glasshouse shop, a broad arch over three shop windows. -->
+  <g transform="translate(1960 285)">
+    <path d="M27 137Q37 119 51 110V136Z M57 108L80 96V136H57Z M95 93Q106 89 119 87V110H95Z M126 87Q143 84 156 87V110H126Z M163 87L185 92V110H163Z M95 116H119V135H95Z M126 116H156V135H126Z M163 116H185V135H163Z M202 96L225 108V136H202Z M231 111Q247 123 252 136H231Z"/>
+    <path d="M23 192H78V220H23Z M23 226H78V248L62 245L49 253L36 243L24 248Z M117 198H173V224H117Z M124 242H168V326H124Z M208 190H261V219H208Z M209 227H261V331H209Z"/>
+  </g>
+
+  <!-- The first interior bays and the real pendant lights beneath the market roof. -->
+  <g transform="translate(2100)">
+    <path opacity=".72" d="M315 574L326 568V602L318 609L315 606Z M350 570H385V605L379 610L354 603Z M396 566H423V606L412 604L396 608Z M431 575H460V606H431Z M475 571H491V604H475Z M639 582H694V600H639Z M642 605H693V636H642Z"/>
+    <path d="M337 553Q340 539 352 538Q364 540 367 553Q351 562 337 553Z M400 571Q403 564 410 564Q417 564 420 571Q412 576 400 571Z M453 554Q456 540 470 539Q482 540 486 554Q470 561 453 554Z M506 539Q510 534 516 533Q523 534 526 539Q517 543 506 539Z M664 543Q667 535 674 535Q682 535 685 543Q675 551 664 543Z"/>
+  </g>
+</g>
+<g transform="translate(2770 0)">
+<ellipse cx="63" cy="536" rx="6" ry="3"/>
+<ellipse cx="63" cy="565" rx="5" ry="3"/>
+<ellipse cx="127" cy="536" rx="3" ry="2"/>
+<ellipse cx="209" cy="529" rx="3" ry="2"/>
+<ellipse cx="259" cy="549" rx="14" ry="5"/>
+<ellipse cx="259" cy="552" rx="12" ry="4"/>
+<rect x="62" y="574" width="7" height="12"/>
+<rect x="71" y="574" width="7" height="12"/>
+</g>
+<g transform="translate(2800 0)">
+<rect x="335" y="366" width="22" height="30"/>
+<rect x="335" y="401" width="22" height="6"/>
+<rect x="335" y="414" width="22" height="25"/>
+<rect x="361" y="366" width="21" height="30"/>
+<rect x="361" y="401" width="21" height="6"/>
+<rect x="361" y="414" width="21" height="25"/>
+<rect x="434" y="366" width="21" height="30"/>
+<rect x="434" y="401" width="21" height="6"/>
+<rect x="434" y="414" width="21" height="24"/>
+<rect x="459" y="366" width="20" height="30"/>
+<rect x="459" y="401" width="20" height="6"/>
+<rect x="459" y="414" width="20" height="24"/>
+<rect x="528" y="366" width="19" height="30"/>
+<rect x="528" y="401" width="19" height="6"/>
+<rect x="528" y="414" width="19" height="42"/>
+<rect x="551" y="366" width="18" height="30"/>
+<rect x="551" y="401" width="18" height="6"/>
+<rect x="551" y="414" width="18" height="42"/>
+<rect x="621" y="366" width="20" height="30"/>
+<rect x="621" y="401" width="20" height="6"/>
+<rect x="621" y="414" width="20" height="25"/>
+<rect x="645" y="366" width="20" height="30"/>
+<rect x="645" y="401" width="20" height="6"/>
+<rect x="645" y="414" width="20" height="25"/>
+<rect x="324" y="562" width="13" height="22"/>
+<rect x="324" y="589" width="13" height="27"/>
+<rect x="341" y="562" width="14" height="22"/>
+<rect x="341" y="589" width="14" height="27"/>
+<rect x="383" y="561" width="19" height="22"/>
+<rect x="383" y="590" width="19" height="23"/>
+<rect x="383" y="620" width="19" height="23"/>
+<rect x="409" y="561" width="20" height="22"/>
+<rect x="409" y="590" width="20" height="23"/>
+<rect x="409" y="620" width="20" height="23"/>
+<rect x="437" y="561" width="24" height="22"/>
+<rect x="437" y="590" width="24" height="23"/>
+<rect x="437" y="620" width="24" height="23"/>
+<rect x="476" y="561" width="23" height="22"/>
+<rect x="476" y="590" width="23" height="23"/>
+<rect x="476" y="620" width="23" height="23"/>
+<rect x="514" y="561" width="23" height="22"/>
+<rect x="514" y="590" width="23" height="23"/>
+<rect x="514" y="620" width="23" height="23"/>
+<rect x="545" y="561" width="19" height="22"/>
+<rect x="545" y="590" width="19" height="23"/>
+<rect x="545" y="620" width="19" height="23"/>
+<rect x="582" y="518" width="11" height="22"/>
+<rect x="582" y="550" width="11" height="14"/>
+<rect x="582" y="570" width="11" height="17"/>
+<rect x="582" y="595" width="11" height="18"/>
+<rect x="597" y="518" width="12" height="22"/>
+<rect x="597" y="550" width="12" height="14"/>
+<rect x="597" y="570" width="12" height="17"/>
+<rect x="597" y="595" width="12" height="18"/>
+<rect x="630" y="518" width="24" height="21"/>
+<rect x="661" y="518" width="22" height="21"/>
+<rect x="643" y="566" width="15" height="18"/>
+<rect x="643" y="590" width="15" height="14"/>
+<rect x="643" y="610" width="15" height="19"/>
+<rect x="663" y="566" width="12" height="18"/>
+<rect x="663" y="590" width="12" height="14"/>
+<rect x="663" y="610" width="12" height="19"/>
+</g>
+<g transform="translate(3500 0)">
+<rect x="53" y="384" width="24" height="15"/>
+<rect x="53" y="405" width="24" height="14"/>
+<rect x="53" y="425" width="24" height="24"/>
+<rect x="53" y="453" width="24" height="11"/>
+<rect x="81" y="380" width="24" height="19"/>
+<rect x="81" y="405" width="24" height="14"/>
+<rect x="81" y="425" width="24" height="24"/>
+<rect x="81" y="453" width="24" height="11"/>
+<rect x="109" y="384" width="27" height="15"/>
+<rect x="109" y="405" width="27" height="14"/>
+<rect x="109" y="425" width="27" height="24"/>
+<rect x="109" y="453" width="27" height="11"/>
+<rect x="209" y="384" width="24" height="15"/>
+<rect x="209" y="405" width="24" height="14"/>
+<rect x="209" y="425" width="24" height="24"/>
+<rect x="209" y="453" width="24" height="11"/>
+<rect x="237" y="380" width="24" height="19"/>
+<rect x="237" y="405" width="24" height="14"/>
+<rect x="237" y="425" width="24" height="24"/>
+<rect x="237" y="453" width="24" height="11"/>
+<rect x="265" y="384" width="25" height="15"/>
+<rect x="265" y="405" width="25" height="14"/>
+<rect x="265" y="425" width="25" height="24"/>
+<rect x="265" y="453" width="25" height="11"/>
+<rect x="42" y="526" width="23" height="25"/>
+<rect x="42" y="557" width="23" height="25"/>
+<rect x="70" y="526" width="24" height="25"/>
+<rect x="70" y="557" width="24" height="25"/>
+<rect x="103" y="526" width="26" height="25"/>
+<rect x="103" y="557" width="26" height="25"/>
+<rect x="138" y="526" width="24" height="25"/>
+<rect x="138" y="557" width="24" height="25"/>
+<rect x="181" y="526" width="25" height="25"/>
+<rect x="181" y="557" width="25" height="25"/>
+<rect x="213" y="526" width="28" height="25"/>
+<rect x="213" y="557" width="28" height="25"/>
+<rect x="251" y="526" width="23" height="25"/>
+<rect x="251" y="557" width="23" height="25"/>
+<rect x="281" y="526" width="18" height="25"/>
+<rect x="281" y="557" width="18" height="25"/>
+<rect x="103" y="590" width="26" height="22"/>
+<rect x="103" y="619" width="26" height="20"/>
+<rect x="138" y="590" width="24" height="22"/>
+<rect x="138" y="619" width="24" height="20"/>
+<rect x="181" y="590" width="25" height="22"/>
+<rect x="181" y="619" width="25" height="20"/>
+<rect x="213" y="590" width="28" height="22"/>
+<rect x="213" y="619" width="28" height="20"/>
+<rect x="251" y="590" width="23" height="22"/>
+<rect x="251" y="619" width="23" height="20"/>
+<rect x="281" y="590" width="18" height="22"/>
+<rect x="281" y="619" width="18" height="20"/>
+<rect x="44" y="589" width="21" height="13"/>
+<rect x="70" y="589" width="24" height="13"/>
+<rect x="381" y="447" width="16" height="13"/>
+<rect x="381" y="466" width="16" height="13"/>
+<rect x="381" y="487" width="16" height="14"/>
+<rect x="381" y="507" width="16" height="14"/>
+<rect x="402" y="447" width="14" height="13"/>
+<rect x="402" y="466" width="14" height="13"/>
+<rect x="402" y="487" width="14" height="14"/>
+<rect x="402" y="507" width="14" height="14"/>
+<rect x="422" y="447" width="14" height="13"/>
+<rect x="422" y="466" width="14" height="13"/>
+<rect x="422" y="487" width="14" height="14"/>
+<rect x="422" y="507" width="14" height="14"/>
+<rect x="441" y="447" width="15" height="13"/>
+<rect x="441" y="466" width="15" height="13"/>
+<rect x="441" y="487" width="15" height="14"/>
+<rect x="441" y="507" width="15" height="14"/>
+<rect x="462" y="447" width="14" height="13"/>
+<rect x="462" y="466" width="14" height="13"/>
+<rect x="462" y="487" width="14" height="14"/>
+<rect x="462" y="507" width="14" height="14"/>
+<rect x="495" y="447" width="14" height="13"/>
+<rect x="495" y="466" width="14" height="13"/>
+<rect x="495" y="487" width="14" height="14"/>
+<rect x="495" y="507" width="14" height="14"/>
+<rect x="515" y="447" width="14" height="13"/>
+<rect x="515" y="466" width="14" height="13"/>
+<rect x="515" y="487" width="14" height="14"/>
+<rect x="515" y="507" width="14" height="14"/>
+<rect x="536" y="447" width="14" height="13"/>
+<rect x="536" y="466" width="14" height="13"/>
+<rect x="536" y="487" width="14" height="14"/>
+<rect x="536" y="507" width="14" height="14"/>
+<rect x="556" y="447" width="13" height="13"/>
+<rect x="556" y="466" width="13" height="13"/>
+<rect x="556" y="487" width="13" height="14"/>
+<rect x="556" y="507" width="13" height="14"/>
+<rect x="576" y="447" width="13" height="13"/>
+<rect x="576" y="466" width="13" height="13"/>
+<rect x="576" y="487" width="13" height="14"/>
+<rect x="576" y="507" width="13" height="14"/>
+<rect x="505" y="549" width="13" height="15"/>
+<rect x="505" y="570" width="13" height="11"/>
+<rect x="505" y="588" width="13" height="14"/>
+<rect x="505" y="608" width="13" height="9"/>
+<rect x="522" y="549" width="9" height="15"/>
+<rect x="522" y="570" width="9" height="11"/>
+<rect x="522" y="588" width="9" height="14"/>
+<rect x="522" y="608" width="9" height="9"/>
+<rect x="554" y="549" width="11" height="15"/>
+<rect x="554" y="570" width="11" height="11"/>
+<rect x="554" y="588" width="11" height="14"/>
+<rect x="554" y="608" width="11" height="9"/>
+<rect x="570" y="549" width="8" height="15"/>
+<rect x="570" y="570" width="8" height="11"/>
+<rect x="570" y="588" width="8" height="14"/>
+<rect x="570" y="608" width="8" height="9"/>
+</g>
+<g transform="translate(4200 0)">
+<path d="M323 424V365 Q323 357 326 352 Q329 358 329 365 V424Z"/>
+<path d="M436 478 V345 Q436 333 444.5 327 Q453 334 453 345 V478Z"/>
+<path d="M462 478 V345 Q462 333 471 327 Q480 334 480 345 V478Z"/>
+<path d="M488 478 V345 Q488 333 496.5 327 Q505 334 505 345 V478Z"/>
+<ellipse cx="470" cy="310" rx="7" ry="9"/>
+<ellipse cx="448" cy="319" rx="3" ry="5"/>
+<ellipse cx="492" cy="319" rx="3" ry="5"/>
+<path d="M440 551 Q444 531 471 525 Q493 531 501 551Z"/>
+<rect x="441" y="565" width="9" height="16"/>
+<rect x="441" y="585" width="9" height="12"/>
+<rect x="441" y="607" width="9" height="15"/>
+<rect x="456" y="565" width="10" height="16"/>
+<rect x="456" y="585" width="10" height="12"/>
+<rect x="456" y="607" width="10" height="15"/>
+<rect x="478" y="565" width="8" height="16"/>
+<rect x="478" y="585" width="8" height="12"/>
+<rect x="478" y="607" width="8" height="15"/>
+<rect x="490" y="565" width="9" height="16"/>
+<rect x="490" y="585" width="9" height="12"/>
+<rect x="490" y="607" width="9" height="15"/>
+</g>
+<g transform="translate(4853 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(4854 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="9"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="9"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="9"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="9"/>
+</g>
+<g transform="translate(4944 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(4943 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="9"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="9"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="9"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="9"/>
+</g>
+<g transform="translate(5027 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5028 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5108 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5109 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5189 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5190 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5270 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5271 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5351 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5352 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5433 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5433 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5513 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5514 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<g transform="translate(5596 0)">
+<path d="M-21 488V372 Q-21 362 -12 357 Q-3 362 -3 371V488Z"/>
+<path d="M4 488V372 Q4 361 13 357 Q21 362 21 372V488Z"/>
+<path d="M-7 342Q-8 337 0 328Q8 336 7 342Q6 348 0 349Q-6 349 -7 342Z"/>
+</g>
+<g transform="translate(5595 0)">
+<path d="M-25 559Q-21 542 0 538Q20 542 25 559Z"/>
+<rect x="-25" y="562" width="11" height="5"/>
+<rect x="-25" y="572" width="11" height="24"/>
+<rect x="-11" y="562" width="9" height="5"/>
+<rect x="-11" y="572" width="9" height="24"/>
+<rect x="2" y="562" width="10" height="5"/>
+<rect x="2" y="572" width="10" height="24"/>
+<rect x="16" y="562" width="9" height="5"/>
+<rect x="16" y="572" width="9" height="24"/>
+<rect x="-25" y="600" width="11" height="11"/>
+<rect x="-11" y="600" width="9" height="11"/>
+<rect x="2" y="600" width="10" height="11"/>
+<rect x="16" y="600" width="9" height="11"/>
+</g>
+<!-- Eastern end of Suzzallo, university buildings beyond the fountain, and the first shopfronts. -->
+<g transform="translate(5600)">
+  <path d="M72 347 Q69 338 81 327 Q94 338 88 346 Q82 355 72 347 Z
+           M59 486 V371 Q60 360 68 355 Q77 362 77 370 V486 Z
+           M85 486 V371 Q85 361 94 355 Q102 360 102 370 V486 Z"/>
+  <path d="M56 611 V568 Q56 547 81 539 Q105 546 106 568 V611 Z"/>
+  <path d="M207 426 V360 L210 355 L212 361 V426 Z"/>
+  <g>
+    <path d="M338 497 V488 L341 486 V497 Z M347 499 V485 L350 485 V498 Z
+             M592 494 V485 L596 485 V494 Z M600 495 V483 L605 483 V495 Z
+             M627 505 V489 L630 485 L632 489 V505 Z M635 504 V488 L638 485 L640 488 V504 Z
+             M646 500 V487 L650 486 V500 Z"/>
+  </g>
+  <!-- Deep arched fanlight; keep the crossbars between the individual glazings. -->
+  <path d="M699 427 Q702 410 718 400 V427 Z
+           M728 409 V393 Q741 388 759 392 V409 Z M728 415 H759 V427 H728 Z
+           M771 399 Q784 408 788 427 H771 Z
+           M699 435 H718 V471 H699 Z M728 435 H759 V471 H728 Z M771 435 H789 V471 H771 Z
+           M827 443 V427 Q827 418 834 417 Q841 419 841 427 V443 Z M827 450 H841 V475 H827 Z"/>
+  <path d="M703 522 L758 522 V538 H703 Z M768 524 L786 519 V535 L768 540 Z
+           M706 552 L740 551 V632 H706 Z M756 551 L785 546 V631 H756 Z
+           M827 522 H840 V544 H827 Z M827 550 H840 V580 H827 Z M827 584 H840 V620 H827 Z"/>
+  <!-- Brick facade crosses the 6600 measurement line. Windowsill plants stay in front. -->
+  <path d="M898 370 Q900 353 918 350 V370 Z M923 350 Q939 353 943 370 H923 Z
+           M898 375 H918 V399 H898 Z M923 375 H943 V399 H923 Z
+           M898 405 H918 V425 Q911 422 898 427 Z M923 405 H943 V425 L934 421 L923 425 Z
+           M989 370 Q992 352 1007 350 V370 Z M1012 350 Q1030 353 1033 370 H1012 Z
+           M989 375 H1007 V399 H989 Z M1012 375 H1033 V399 H1012 Z
+           M989 405 H1007 V424 L999 422 L989 426 Z M1012 405 H1033 V425 L1028 422 L1012 424 Z"/>
+  <path d="M893 514 H911 V536 H893 Z M915 514 H934 V536 H915 Z M938 514 H957 V536 H938 Z
+           M893 546 H958 V629 H905 L901 612 L893 601 Z
+           M985 514 H1011 V532 H985 Z M1016 514 H1041 V532 H1016 Z
+           M989 550 H1038 V630 H989 Z"/>
+</g>
+<!-- Street lamps, light fixtures and Pier 57. -->
+<g transform="translate(6600)">
+  <ellipse cx="164.5" cy="440" rx="13" ry="12"/>
+  <ellipse cx="139.5" cy="463.5" rx="11" ry="11.5"/>
+  <ellipse cx="188.5" cy="463.5" rx="11" ry="11.5"/>
+  <ellipse cx="970.5" cy="444" rx="12" ry="11.5"/>
+  <ellipse cx="946.5" cy="466.5" rx="11" ry="11"/>
+  <ellipse cx="995" cy="466.5" rx="11" ry="10.5"/>
+  <ellipse cx="391" cy="478" rx="5" ry="3.7"/>
+  <ellipse cx="334.5" cy="501.5" rx="4.5" ry="3.5"/>
+  <ellipse cx="448" cy="501.5" rx="4.4" ry="3.4"/>
+  <path d="M211 534 H222 V541 H211 Z M212 546 H222 V560 L217 561 L212 565 Z
+           M235 532 H246 V541 H235 Z M250 532 H263 V541 H250 Z
+           M235 546 H246 V568 H235 Z M250 546 H263 V569 H250 Z
+           M289 531 H309 V540 H289 Z M313 531 H331 V540 H313 Z
+           M289 546 H309 V570 H289 Z M313 546 H331 V570 H313 Z
+           M349 531 H370 V540 H349 Z M375 531 H389 V540 H375 Z M393 531 H404 V540 H393 Z M410 531 H427 V540 H410 Z
+           M349 546 H370 V569 H349 Z M375 546 H389 V569 H375 Z M393 546 H404 V569 H393 Z M410 546 H427 V569 H410 Z
+           M446 531 H463 V540 H446 Z M467 531 H483 V540 H467 Z
+           M446 546 H463 V569 H446 Z M467 546 H483 V569 H467 Z
+           M500 543 H511 V563 H500 Z"/>
+</g>
+<!-- Warm interior lights aboard the ferry, with a mix of occupied and dark cabins. -->
+<g transform="translate(7600)">
+  <path d="M171 434 H176 L179 441 H173 Z M187 434 H194 V441 H188 Z M211 433 H217 V441 H211 Z
+           M575 433 H581 V440 H575 Z M594 433 H601 V440 H594 Z M616 433 H623 L621 441 H614 Z"/>
+  <g>
+    <rect x="156" y="478" width="10" height="10" rx=".9"/><rect x="186" y="478" width="19" height="10" rx=".8"/>
+    <rect x="235" y="478" width="20.5" height="10" rx=".8"/><rect x="294" y="478" width="26" height="10" rx=".8"/>
+    <rect x="329" y="478" width="19" height="10" rx=".8"/><rect x="385" y="478" width="19.5" height="10" rx=".8"/>
+    <rect x="412" y="478" width="21" height="10" rx=".8"/><rect x="469" y="478" width="20" height="10" rx=".8"/>
+    <rect x="495" y="478" width="20" height="10" rx=".8"/><rect x="550" y="478" width="17" height="10" rx=".8"/>
+    <rect x="592" y="478" width="19.5" height="10" rx=".8"/>
+    <rect x="180" y="511" width="14.5" height="13.5" rx="1.2"/>
+    <rect x="235" y="511" width="20.5" height="11" rx=".9"/><rect x="265" y="511" width="19" height="11" rx=".9"/>
+    <rect x="328" y="511" width="20" height="11" rx=".9"/><rect x="357" y="511" width="20" height="11" rx=".9"/>
+    <rect x="412" y="511" width="21" height="11" rx=".9"/><rect x="441" y="511" width="20" height="11" rx=".9"/>
+    <rect x="495" y="511" width="20" height="11" rx=".9"/><rect x="523" y="511" width="19.5" height="11" rx=".9"/>
+    <rect x="603" y="511" width="15.5" height="13" rx="1"/>
+  </g>
+</g>
+<g>
+  <g transform="translate(985 180)">
+    <!-- Shop skyline, west office tower -->
+    <path opacity="0.52" d="
+      M24 49h3v8h-3z
+      M36 53h2v5h-2z
+      M26 71h3v6h-3z
+      M36 88h3v5h-3z
+      M58 34h3v7h-3z
+      M65 37h4v7h-4z
+      M85 35h3v5h-3z
+      M92 52h4v7h-4z
+      M65 68h3v6h-3z
+      M57 91h4v6h-4z
+      M83 91h4v7h-4z
+      M117 52h3v6h-3z
+      M129 70h3v7h-3z
+      M122 88h3v6h-3z"/>
+    <!-- Low offices beyond the Needle -->
+    <path opacity="0.46" d="
+      M242 98h3v5h-3z
+      M250 110h4v6h-4z
+      M265 100h4v5h-4z
+      M285 87h3v5h-3z
+      M304 85h3v6h-3z
+      M322 83h3v8h-3z
+      M292 100h3v5h-3z
+      M310 106h4v7h-4z
+      M329 112h3v5h-3z
+      M350 110h3v5h-3z
+      M415 119h3v4h-3z
+      M431 118h3v5h-3z
+      M452 124h4v4h-4z
+      M677 88h3v6h-3z
+      M694 86h4v6h-4z
+      M703 103h3v6h-3z
+      M723 86h3v5h-3z
+      M736 85h4v5h-4z
+      M754 88h3v5h-3z
+      M726 107h4v5h-4z
+      M765 102h3v5h-3z"/>
+    <!-- East skyline return -->
+    <path opacity="0.5" d="
+      M810 73h4v6h-4z
+      M818 87h3v6h-3z
+      M829 73h3v6h-3z
+      M837 85h3v6h-3z
+      M848 66h3v5h-3z
+      M861 67h3v6h-3z
+      M870 87h3v5h-3z
+      M859 99h3v5h-3z"/>
+  </g>
+  <g transform="translate(6910 170)">
+    <!-- Painted west blocks -->
+    <path opacity="0.45" d="
+      M191 217h3v4h-3z
+      M202 214h3v5h-3z
+      M213 222h2v4h-2z
+      M236 207h3v5h-3z
+      M246 215h4v4h-4z
+      M257 205h3v5h-3z
+      M264 170h3v4h-3z
+      M276 170h3v4h-3z
+      M282 180h3v4h-3z
+      M294 169h3v4h-3z
+      M304 175h3v5h-3z
+      M315 185h3v4h-3z
+      M291 193h3v4h-3z
+      M303 198h3v5h-3z
+      M312 211h3v5h-3z
+      M265 240h3v4h-3z
+      M284 237h3v4h-3z
+      M301 236h3v4h-3z
+      M322 241h3v5h-3z
+      M330 231h3v4h-3z"/>
+    <!-- Smith Tower upper lantern -->
+    <path opacity="0.65" d="
+      M378 127h1.8v3.2h-1.8z
+      M385 131h1.8v4h-1.8z
+      M395 121h2.1v4h-2.1z
+      M403 123h2.2v3.4h-2.2z
+      M410 130h2.1v3.8h-2.1z
+      M395 137h2.3v3.3h-2.3z
+      M403 145h2.1v3.8h-2.1z
+      M410 145h2.5v3.5h-2.5z
+      M395 153h2.3v3.9h-2.3z
+      M385 151h1.8v3h-1.8z
+      M369 168h2.3v4.8h-2.3z
+      M376 167h2.6v4h-2.6z
+      M393 166h2.2v3.6h-2.2z
+      M407 166h2.7v3.6h-2.7z
+      M412 172h2v3.5h-2z"/>
+    <!-- Smith Tower masonry windows -->
+    <path opacity="0.61" d="
+      M349 194h2.6v3.5h-2.6z
+      M361 193h2.7v4h-2.7z
+      M373 198h2.4v4.5h-2.4z
+      M356 207h2.5v3.6h-2.5z
+      M364 215h2.5v4h-2.5z
+      M371 227h2.4v3.8h-2.4z
+      M349 235h2.5v3.5h-2.5z
+      M386 185h2.7v4h-2.7z
+      M395 187h2.6v4h-2.6z
+      M410 187h2.7v4.2h-2.7z
+      M426 186h2.6v3.9h-2.6z
+      M434 194h2.6v4h-2.6z
+      M386 204h2.7v4h-2.7z
+      M402 203h2.7v4.3h-2.7z
+      M417 204h2.6v4h-2.6z
+      M430 210h2.7v3.8h-2.7z
+      M402 222h2.6v4h-2.6z
+      M386 230h2.8v4h-2.8z
+      M396 239h2.5v4h-2.5z
+      M409 222h2.6v3.8h-2.6z
+      M425 224h2.8v4.3h-2.8z
+      M433 233h2.7v4.2h-2.7z
+      M387 253h2.7v4h-2.7z
+      M395 260h2.8v4.1h-2.8z
+      M411 250h2.4v4.4h-2.4z
+      M432 250h2.7v4h-2.7z"/>
+    <!-- Brick blocks below tower -->
+    <path opacity="0.55" d="
+      M272 266h3v4h-3z
+      M284 278h3.2v4h-3.2z
+      M296 267h3.3v5h-3.3z
+      M315 268h3.1v4.4h-3.1z
+      M328 268h3.4v4.3h-3.4z
+      M347 278h3.2v4.2h-3.2z
+      M357 268h3.4v4h-3.4z
+      M367 277h3.4v4.4h-3.4z"/>
+    <!-- Columbia Center stepped glass -->
+    <path opacity="0.5" d="
+      M555 51h3v2h-3z
+      M563 59h4v2h-4z
+      M552 70h3v2h-3z
+      M572 56h3.4v2h-3.4z
+      M580 64h3.5v1.8h-3.5z
+      M586 51h3.4v1.8h-3.4z
+      M595 63h4v2h-4z
+      M591 75h3v2h-3z
+      M604 85h3v2h-3z
+      M545 96h3v2h-3z
+      M555 101h4v2h-4z
+      M568 93h3v2h-3z
+      M577 108h4v2h-4z
+      M595 113h4v2h-4z
+      M607 108h3v2h-3z
+      M536 130h3.5v2h-3.5z
+      M546 140h3.6v2h-3.6z
+      M560 130h4v2h-4z
+      M577 144h4v2h-4z
+      M590 134h4v2h-4z
+      M602 145h4v2h-4z
+      M553 156h4v2h-4z
+      M537 170h3.5v2h-3.5z
+      M565 174h4v2h-4z
+      M573 162h3.7v2h-3.7z
+      M590 174h4v2h-4z
+      M601 185h4v2h-4z
+      M544 198h3.5v2h-3.5z
+      M557 208h3.7v2h-3.7z
+      M576 202h4v2h-4z
+      M597 202h4v2h-4z
+      M607 216h3.4v2h-3.4z"/>
+    <!-- Harbor office and apartment blocks -->
+    <path opacity="0.54" d="
+      M448 200h3v3.5h-3z
+      M459 205h3v3.4h-3z
+      M474 179h3.4v4h-3.4z
+      M486 177h3v4h-3z
+      M499 189h3.4v4h-3.4z
+      M508 184h3.4v4h-3.4z
+      M485 195h3.4v3.8h-3.4z
+      M510 210h3.3v4h-3.3z
+      M522 211h3.5v4h-3.5z
+      M463 233h3.4v4.5h-3.4z
+      M475 242h3.1v4.3h-3.1z
+      M482 233h3v4.4h-3z
+      M490 251h3.5v4h-3.5z
+      M501 235h3.4v4.4h-3.4z
+      M517 234h3.2v4h-3.2z
+      M527 246h3.2v4h-3.2z
+      M545 232h3.4v4.5h-3.4z
+      M553 241h3.1v4.4h-3.1z
+      M566 233h3.2v4.3h-3.2z
+      M578 248h3.2v4.2h-3.2z"/>
+    <!-- Last pale waterfront blocks -->
+    <path opacity="0.46" d="
+      M625 204h3v3.5h-3z
+      M635 200h3v3.3h-3z
+      M646 208h3.2v4h-3.2z
+      M653 215h3v4h-3z
+      M638 221h3v4h-3z
+      M669 219h3.2v4h-3.2z
+      M678 216h3.1v4h-3.1z
+      M690 222h3v4h-3z
+      M698 215h3.2v4h-3.2z
+      M626 249h3.1v4h-3.1z
+      M635 252h3v4h-3z
+      M646 248h3v4h-3z
+      M682 237h3.4v4h-3.4z
+      M690 246h3.1v4h-3.1z
+      M703 239h3.1v4h-3.1z
+      M709 255h3.1v4h-3.1z
+      M725 248h3.1v4h-3.1z
+      M733 254h2.5v3.2h-2.5z"/>
+  </g>
+</g>
+</g>
+</svg>
