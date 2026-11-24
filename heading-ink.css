@@ -1,8 +1,6 @@
 @media (prefers-reduced-motion: no-preference) {
-  .ink-prepared .ink-word { position: relative; display: inline-block; }
-  .ink-prepared .ink-word:not(.ink-written) { color: transparent; }
-  .ink-word .ink-mark { color: var(--route-blue); }
-  .ink-written .ink-mark { opacity: 1 !important; }
+  [data-pen-pending] [data-write-title]:not(.ink-prepared) { visibility: hidden; }
+  .ink-prepared .ink-word { position: relative; display: inline-block; color: transparent; }
   .ink-baseline {
     display: inline-block;
     position: relative;
@@ -14,11 +12,15 @@
     position: absolute;
     pointer-events: none;
   }
-  .ink-written canvas { display: none; }
-  [data-ink-arrived="playing"] :is(.market-copy p, .notebook, .harbor-contact .contact-links) {
+  /* Let the first reveal start from clear ink as the street slides into view. */
+  [data-street-navigation-ready] .street-stop:not([data-ink-arrived])
+    :is(.market-loaves, .notebook, .resume-note, .harbor-contact .contact-links):not(:focus-within) {
+    opacity: 0;
+  }
+  [data-ink-arrived="playing"] :is(.market-loaves, .notebook, .harbor-contact .contact-links) {
     animation: street-note-arrives .48s ease-out .14s backwards;
   }
-  [data-ink-arrived="playing"] :is(.market-loaves, .resume-note) {
+  [data-ink-arrived="playing"] .resume-note {
     animation: street-note-arrives .48s ease-out .23s backwards;
   }
   @keyframes street-note-arrives {

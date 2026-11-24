@@ -169,7 +169,6 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   font-family: var(--sans);
   width: min(98%, 45rem); text-align: center; transform: translateX(-4vw);
 }
-.about-letter h1 { margin: 0; }
 .about-letter h1:focus { outline: none; }
 .intro-bio {
   font: 400 clamp(1.375rem, calc(1.125rem + .75vw), 1.875rem)/1.26 var(--sans);
@@ -182,10 +181,10 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 .about-letter .hero-ctas .button { min-height: 42px; font-size: 1.02rem; padding: .45rem 1.22rem; }
 .about-letter .hero-ctas .work-button { color: var(--route-blue); font-family: var(--hand); }
 .about-letter .hero-ctas .resume-button { color: var(--route-ink); }
-.street-title { font: 400 clamp(2.2rem, 4.5vw, 3.75rem)/1.05 var(--hand); color: var(--route-blue); margin: 0; }
+/* Keep the same breathing room as the bakery display at the other stops. */
+.market-content, .pier-notes, .harbor-contact { --heading-content-gap: clamp(1.65rem, 5.2dvh, 3rem); }
 .pier-notes { width: min(92%, 43rem); text-align: center; }
-.pier-notes .street-title { font-size: clamp(2rem, 3.7vw, 3.2rem); }
-.notebook { margin: 1.25rem 0 .75rem; display: grid; grid-template-columns: 1fr 1fr; text-align: left; gap: 1.65rem; }
+.notebook { margin: var(--heading-content-gap) 0 .75rem; display: grid; grid-template-columns: 1fr 1fr; text-align: left; gap: 1.65rem; }
 .notebook > div { border-top: 1.5px solid var(--route-line); padding-top: .5rem; }
 .notebook dt { font-size: clamp(1.3rem, 2vw, 1.55rem); color: var(--route-ink); margin-bottom: .2rem; line-height: 1.15; }
 .education-school { display: flex; align-items: center; gap: .38em; }
@@ -193,11 +192,10 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   box-sizing: border-box; flex: none; width: var(--school-badge-size); height: var(--school-badge-size);
   padding: .19em; background: #fff; border-radius: 50%; object-fit: contain;
 }
-.notebook dd { color: var(--route-muted); margin: 0 0 .35rem; font-size: 1.04rem; line-height: 1.25; }
-.resume-note { color: var(--route-blue); font: 400 1.05rem/1.5 var(--hand); text-decoration: underline; text-underline-offset: .21em; }
-.harbor-contact { text-align: center; }
-.harbor-contact .street-title { font-size: clamp(3.35rem, 7vw, 5.7rem); transform: rotate(-2deg); }
-.harbor-contact .contact-links { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 1.05rem; margin: 1.3rem 0 0; }
+.notebook dd { text-align: center; color: var(--route-muted); margin: 0 0 .35rem; font-size: 1.04rem; line-height: 1.25; }
+.resume-note { color: var(--route-blue); font: 400 clamp(1.25rem, 1.75vw, 1.5rem)/1.5 var(--hand); text-decoration: underline; text-underline-offset: .21em; }
+.harbor-contact { width: min(100%, 34rem); text-align: center; }
+.harbor-contact .contact-links { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 1.05rem; margin: var(--heading-content-gap) 0 0; }
 .harbor-contact .contact-display { position: relative; width: 56px; height: 56px; margin: 0; border-radius: 45% 48% 44% 48%; border: 1.5px solid var(--route-line); background: var(--bg); }
 .harbor-contact .contact-logo { width: 27px; height: 27px; }
 .harbor-contact .contact-display:is(:hover,:focus-visible) { border-color: var(--route-blue); }
@@ -240,9 +238,9 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   .about-letter { transform: none; width: 100%; }
   .about-letter .hero-ctas { flex-wrap: wrap; }
   .intro-bio { max-width: 31ch; }
-  .notebook { display: block; margin: .6rem 0; }
-  .notebook > div { margin-top: .42rem; }
-  .notebook dd { font-size: 1rem; margin-bottom: .12rem; }
+  .notebook { display: block; margin-bottom: .6rem; }
+  .notebook > div + div { margin-top: .42rem; }
+  .notebook dd { text-align: start; font-size: 1rem; margin-bottom: .12rem; }
   .route-footer { grid-template-columns: 1fr auto; gap: .5rem; }
   .place-name { font-size: 1rem; }
   .direction { gap: .05rem; }
@@ -252,8 +250,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   .street-page { --shell-top: 2.75rem; --shell-foot: 2.75rem; }
   .intro-bio { margin: 1.15rem auto .4rem; line-height: 1.18; }
   .about-letter .hero-ctas .button { min-height: 36px; }
-  .notebook { margin-block: .4rem; }
-  .street-title, .pier-notes .street-title { font-size: 1.85rem; }
+  .notebook { margin-bottom: .4rem; }
   .scene-reading { padding-block: .3rem .6rem; }
 }
 @media (max-width: 380px) {
@@ -277,7 +274,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 /* A single painted world moves with the native scroll offset. The four reading
    windows have their own anchors; the artwork never restarts at those anchors. */
 .street-page {
-  --street-scale: .95;
+  --street-scale: .9025;
   --street-natural-height: min(32vw, 48dvh);
   --block-min-width: 72vw;
   --street-height: calc(var(--street-natural-height) * var(--street-scale));
@@ -305,7 +302,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   width: calc(4 * var(--block-width)); pointer-events: none; --walk-baseline: 1.5%;
 }
 .city-painted-world { display: block; width: 100%; height: 100%; max-width: none; }
-#market-clock, .city-painted-world, .opening-facades::before, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
+#market-clock, .city-painted-world, .opening-preview, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
   filter: brightness(var(--street-light, 1)) saturate(var(--street-saturation, 1));
 }
 /* The light maps register to the original 8400 × 724 painting, including its mobile stretch. */
@@ -335,18 +332,28 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   opacity: var(--market-neon, 0);
 }
 [data-street-lit] .market-neon { background-image: url("assets/pike-market-neon.webp"); }
-/* These details share the panorama's ground and buildings. Keep their boxes
-   measurable for lazy loading, and let the flag use its own opening backdrop. */
-[data-street-navigation-ready] .city-painted-world:not([data-painted]) ~ * { opacity: 0; }
-[data-street-navigation-ready] .opening-facades > .city-painted-world:not([data-painted]) ~ .needle-banner { opacity: 1; }
-.city-painted-world:not([data-painted]) ~ :is(.street-window-lights, .market-neon, .space-needle-lights),
-.opening-facades :is(.street-window-lights, .market-neon, .space-needle-lights) { visibility: hidden; }
-.city-stage.opening-facades::before {
-  content: '';
+/* Either image supplies a registered ground for all four stops. */
+[data-street-navigation-ready] .opening-preview:not([data-painted]) + .city-painted-world:not([data-painted]) ~ *,
+[data-street-opening] .opening-facades > .city-painted-world ~ :not(.needle-banner),
+[data-street-navigation-ready] .opening-facades > .city-painted-world { opacity: 0; }
+.opening-preview:not([data-painted]) + .city-painted-world:not([data-painted]) ~ :is(.street-window-lights, .market-neon, .space-needle-lights),
+[data-street-opening] .opening-facades :is(.street-window-lights, .market-neon, .space-needle-lights) { visibility: hidden; }
+.city-stage > .opening-preview {
   position: absolute;
-  inset: 0;
+  inset: auto auto 0 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
   z-index: -1;
-  background: url("assets/opening-facades.webp") left bottom / 62.5% 100% no-repeat;
+  visibility: hidden;
+}
+.opening-preview[data-painted]:has(+ .city-painted-world:not([data-painted])),
+.opening-facades > .opening-preview[data-painted] {
+  visibility: visible;
+}
+html[data-street-opening="loading"] .city-stage { visibility: hidden; }
+html[data-street-opening="loading"] :is(.city-stage, #about h1, #about .hero-ctas, .tour-header, .route-footer, #street-motion) {
+  animation-play-state: paused;
 }
 .campus-conversation {
   position: absolute; left: 62.7%; bottom: 3.7%; height: max(2rem, 17.5%);
@@ -461,39 +468,54 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   .street-world #experience { left: calc(2.56 * var(--block-width) - 50vw - var(--first-trim)); }
 }
 
-@font-face {
-  font-family: "Caveat";
-  src: url("assets/caveat-regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-/* The pen and the final text share the same Caveat outlines. This subset
-   omits contextual substitutions and kerning so neighboring letters cannot
-   reshape completed ink. It arrives with this render-blocking stylesheet.
-   Source and license: assets/caveat-regular.woff2 and assets/caveat-license.txt. */
-@font-face {
-  font-family: "Seattle Greeting Ink";
-  src: url("data:font/woff2;base64,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") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: block;
-}
-.about-letter .welcome-lettering {
+.tour-heading {
   container-type: inline-size;
+  display: flex;
+  justify-content: center;
   width: min(100%, 34rem);
   margin: 0 auto;
-  line-height: 1;
 }
-.greeting-line {
-  display: inline-flex;
-  align-items: baseline;
+.tour-heading > [data-write-title] {
   white-space: nowrap;
-  font: 400 clamp(2rem, 15.7cqi, 5.1rem)/1.12 "Seattle Greeting Ink", "Caveat", var(--hand);
-  letter-spacing: -.025em;
+  font: 400 clamp(2rem, 15.7cqi, 5.1rem)/1.12 var(--hand);
+  /* Keep native text and the individually drawn letters on the same advances. */
+  font-kerning: none;
+  font-variant-ligatures: none;
+  letter-spacing: normal;
   color: var(--route-blue);
 }
-.greeting-words { transform: rotate(-1deg); }
+/* The published greeting uses a Caveat subset with stable letter shapes. */
+@font-face {
+  font-family: "Seattle Greeting Ink";
+  src: url("assets/seattle-greeting-ink.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+#about-title > [data-write-title="greeting"] {
+  font-family: "Seattle Greeting Ink", "Caveat", var(--hand);
+  letter-spacing: -.025em;
+  transform: rotate(-1deg);
+}
+/* Patrick Hand with a 0.0035em inset on each edge, preserving the advances. */
+@font-face {
+  font-family: "Seattle Section Ink";
+  src: url("assets/seattle-section-ink.woff2") format("woff2");
+  font-weight: 375;
+  font-style: normal;
+  font-display: swap;
+}
+/* Each reading window starts at the same height as the greeting, regardless
+   of how much text or artwork sits beneath its heading. */
+[data-street-navigation-ready] .street-stop:not(.about-stop) .stop-scroll {
+  align-items: start;
+  padding-block-start: var(--greeting-inset);
+}
+.street-stop:not(.about-stop) .tour-heading > [data-write-title] {
+  font-family: "Seattle Section Ink", var(--hand);
+  font-weight: 375;
+  font-size: var(--greeting-size, clamp(2rem, 15.7cqi, 5.1rem));
+}
 .about-letter .intro-bio {
   max-width: 32rem;
   margin: clamp(1rem, 3dvh, 1.8rem) auto clamp(.85rem, 2dvh, 1.3rem);
@@ -562,7 +584,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 }
 .intro-bio .school-mark img { display: block; width: 67%; height: auto; }
 @media (max-height: 575px) {
-  .about-letter .welcome-lettering { width: min(100%, 24rem, 79dvh); }
+  .tour-heading { width: min(100%, 24rem, 79dvh); }
   .about-letter .intro-bio { margin: .6rem auto; font-size: 1.1rem; }
 }
 @media (max-width: 360px) {
@@ -581,7 +603,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   }
 }
 @media (min-width: 701px) and (max-height: 730px) {
-  .about-letter .welcome-lettering { width: min(100%, 65dvh, 30rem); }
+  .tour-heading { width: min(100%, 65dvh, 30rem); }
   .about-letter .intro-bio {
     margin: .5rem auto .65rem;
     font-size: clamp(1.05rem, 3dvh, 1.3rem);
@@ -593,7 +615,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
 
 /* Before the horizontal tour is available, anchors lead to ordinary sections. */
 html:not([data-street-navigation-ready]) .street-page { overflow: auto; }
-html:not([data-street-navigation-ready]) .tour-shell { display: block; height: auto; }
+html:not([data-street-navigation-ready], [data-opening-pending]) .tour-shell { display: block; height: auto; }
 html:not([data-street-navigation-ready]) .tour-header { min-height: var(--shell-top); }
 html:not([data-street-navigation-ready]) #street-rail { display: block; height: auto; overflow: visible; }
 html:not([data-street-navigation-ready]) .street-world {
@@ -608,29 +630,42 @@ html:not([data-street-navigation-ready]) .about-letter { transform: none; }
 html:not([data-street-navigation-ready]) .city-stage {
   position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 8400 / 724;
 }
-html:not([data-street-navigation-ready]) :is(.route-footer, #street-motion, .sky-window),
+html:not([data-street-navigation-ready], [data-opening-pending]) .sky-window,
+html:not([data-street-navigation-ready]) :is(.route-footer, #street-motion),
 html:not([data-street-navigation-ready]) .city-stage :is(.street-traffic, .harbor-air, .campus-conversation, .drumheller-water, .cherry-fall, .harbor-wheel canvas) { display: none; }
 html:not([data-street-navigation-ready]) .harbor-wheel img { display: block; }
 html:not([data-street-navigation-ready]) .street-tree .wind-canopy { animation: none; }
 
+html[data-opening-pending]:not([data-street-navigation-ready]) :is(#street-rail, .tour-header, .route-footer, #street-motion) { display: none; }
+html[data-opening-pending]:not([data-street-navigation-ready]) .sky-window { inset: 0; }
+
 /* Hold on the living flag, then widen the shot on the same street. */
 @media (prefers-reduced-motion: no-preference) {
+  [data-street-opening] {
+    --opening-hold: 1s;
+    --opening-travel: 1.95s;
+  }
   [data-street-opening] .city-stage,
-  [data-street-opening] .sky-window,
   [data-street-opening] #about h1,
   [data-street-opening] #about .hero-ctas,
   [data-street-opening] :is(.tour-header, .route-footer, #street-motion) {
-    animation-duration: 1.35s;
-    animation-delay: 1s;
-    animation-timing-function: cubic-bezier(.46,0,.20,1);
+    animation-duration: var(--opening-travel);
+    animation-delay: var(--opening-hold);
+    animation-timing-function: cubic-bezier(.42,0,.34,1);
     animation-fill-mode: both;
   }
   [data-street-opening] .city-stage {
     transform-origin: 0 0;
     animation-name: needle-pullback;
+    animation-timing-function: cubic-bezier(.32,0,.65,1);
   }
-  [data-street-opening] .sky-window { transform-origin: 50% 72%; animation-name: opening-sky; }
-  [data-street-opening] #about h1 { animation-name: opening-greeting; }
+  /* The cloth changes shape every frame while the street behind it is a still painting. */
+  [data-street-opening] .needle-banner { will-change: transform; }
+  [data-street-opening] #about h1 {
+    animation-name: opening-greeting;
+    animation-delay: calc(var(--opening-hold) + var(--opening-travel) * .55);
+    animation-duration: .24s;
+  }
   [data-street-opening] #about .hero-ctas { animation-name: opening-copy; }
   [data-street-opening] :is(.tour-header, .route-footer, #street-motion) { animation-name: opening-controls; }
 
@@ -638,17 +673,13 @@ html:not([data-street-navigation-ready]) .street-tree .wind-canopy { animation: 
     from { transform: var(--flag-framing); }
     to { transform: translate3d(0,0,0) scale(1); }
   }
-  @keyframes opening-sky {
-    from { transform: scale(1.085); }
-    to { transform: none; }
-  }
   @keyframes opening-greeting {
     from { opacity: 0; }
-    8%, to { opacity: 1; }
+    to { opacity: 1; }
   }
   @keyframes opening-copy {
-    from, 37% { transform: translateY(5px); opacity: 0; }
-    91%, to { transform: none; opacity: 1; }
+    from, 65% { transform: translateY(5px); opacity: 0; }
+    to { transform: none; opacity: 1; }
   }
   @keyframes opening-controls {
     from, 46% { opacity: 0; }

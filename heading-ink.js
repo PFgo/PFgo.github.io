@@ -1,142 +1,228 @@
-// Pen paths follow the printed shapes of each font at 100px.
-// Each | lifts the pen for a crossbar, a dot, or a second stroke.
+// Each tile records when the pen reaches each part of a glyph.
 (() => {
-  const patrickStrokes = {
-    P: 'M10 -5 L9 -61 Q42 -68 43 -50 Q45 -29 11 -34',
-    r: 'M8 -43 Q13 -31 12 -5 M12 -28 Q16 -46 33 -42',
-    o: 'M20 -43 C0 -42 3 -3 21 -4 C40 -3 37 -43 20 -43',
-    j: 'M12 -43 Q18 35 -5 19|M12 -59 l.3 .5',
-    e: 'M7 -26 Q34 -23 30 -37 C26 -50 5 -45 6 -26 Q7 10 34 -12',
-    c: 'M34 -40 C-4 -57 -5 13 34 -10',
-    t: 'M16 -68 Q16 -29 19 -4|M5 -43 h27',
-    b: 'M8 -68 L10 -5 C46 1 40 -46 10 -41',
-    a: 'M33 -40 C1 -63 -5 11 27 -7 L33 -20|M32 -42 L34 -3',
-    k: 'M8 -68 L10 -4|M33 -42 Q25 -29 12 -21 M24 -28 Q34 -18 37 -5',
-    y: 'M6 -42 L22 -4|M36 -42 L14 27',
-    E: 'M10 -61 L11 -4|M10 -61 Q26 -58 38 -62|M10 -34 h23|M10 -4 h27',
-    x: 'M7 -42 L37 -4|M36 -42 L7 -4',
-    p: 'M8 -42 L8 27|M9 -32 C30 -62 49 -23 32 -8 Q20 1 9 -8',
-    i: 'M10 -42 L11 -4|M10 -60 l.2 .5',
-    n: 'M8 -42 L9 -4 M10 -32 Q34 -65 36 -22 L36 -4',
-    '&': 'M49 -5 C30 -39 9 -56 27 -62 C39 -67 47 -46 26 -36 C-8 -20 12 9 30 -5 Q40 -11 49 -27',
-    d: 'M31 -68 L33 -4|M31 -41 C0 -55 -4 5 24 -5 Q30 -9 32 -19',
-    u: 'M7 -42 Q3 20 31 -17 M31 -42 Q31 -21 34 -4',
-    S: 'M39 -58 C10 -73 -5 -44 16 -36 Q42 -31 39 -19 Q36 4 7 -9',
-    h: 'M7 -68 L10 -4 M10 -33 Q36 -57 35 -23 L34 -4',
-    '.': 'M9 -6 l.4 .4'
-  };
-  const caveatStrokes = {
-    G: 'M54 -60 Q49 -78 34 -61 C22 -49 4 -1 22 1 C36 3 48 -18 50 -31 Q43 -34 33 -33',
-    l: 'M30 -66 Q21 -43 14 -23 Q10 -10 11 -2',
-    a: 'M38 -30 C32 -51 11 -25 12 -8 Q14 3 37 -27|M38 -33 Q32 -14 45 -7',
-    d: 'M34 -30 Q22 -39 13 -16 Q7 -3 18 -7 Q34 -15 40 -37|M50 -65 C44 -44 29 -23 35 0',
-    y: 'M16 -38 Q12 -5 22 -8 Q30 -10 38 -37|M38 -36 Q24 -1 16 11 Q5 23 -5 14',
-    o: 'M29 -33 Q15 -30 12 -12 Q10 -1 21 -6 Q36 -15 36 -29 Q36 -42 27 -36',
-    u: 'M22 -38 Q8 -8 15 -7 Q23 -4 39 -32|M39 -32 Q27 -9 36 -3',
-    '’': 'M23 -66 Q31 -60 20 -47',
-    r: 'M22 -41 L13 -5|M16 -20 Q26 -33 38 -33',
-    e: 'M13 -22 Q30 -20 35 -32 Q35 -41 25 -36 C10 -30 6 -4 22 -7 Q28 -8 32 -12',
-    h: 'M30 -66 Q24 -45 12 -7|M14 -14 Q32 -39 41 -31 C48 -28 34 -17 44 -8',
-    '.': 'M14 -12 l-1 4'
-  };
-  const forcedColors = matchMedia('(forced-colors: active)');
-  const glyphs = new Map();
-  function glyphFor(drawing) {
-    if (!glyphs.has(drawing)) {
-      const passes = drawing.split('|').map(d => {
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', d);
-        const length = path.getTotalLength();
-        return { shape: new Path2D(d), length, duration: Math.max(30, length * .66) };
-      });
-      glyphs.set(drawing, passes);
-    }
-    return glyphs.get(drawing);
+  const tileWidth = 136, tileHeight = 232, columns = 6;
+  const samplesPerUnit = 2, tileTop = -82;
+
+  // In atlas order: character, writing time, pen-down x/y, pen-up x/y.
+  // Times and positions are produced by scripts/build_heading_pen.py.
+  function penPlan(entries) {
+    return new Map(entries.map(([letter, duration, fromX, fromY, toX, toY], index) =>
+      [letter, {duration, fromX, fromY, toX, toY, index}]));
   }
 
-  // Each canvas sits on its own word, so the browser still wraps and centers the
-  // original heading. All pen and font measurements use the same 100px em.
-  function makeWord(label, measure, layout, start) {
+  const patrickPlan = penPlan([
+    ['G', 102.243, 44, -58, 41, -4],
+    ['l', 49.139, 8, -66, 22, -10],
+    ['a', 85.593, 31, -41, 33, -3],
+    ['d', 122.53, 31, -42, 33, -4],
+    ['y', 83.237, 6, -43, 15, 27],
+    ['o', 68.66, 27, -40, 27, -40],
+    ['u', 90.518, 8, -43, 34, -2],
+    ['’', 23, 11, -72, 8, -61],
+    ['r', 57.684, 8, -44, 33, -42],
+    ['e', 73.576, 6, -25, 34, -13],
+    ['h', 90.523, 8, -69, 34, -4],
+    ['.', 23, 10.6, -6.6, 10.8, -6.3],
+    ['P', 95.765, 9, -59, 10, -34],
+    ['j', 87.892, 12, -43, 10.7, -57.2],
+    ['c', 51.969, 33, -42, 35, -11],
+    ['t', 73.871, 18, -68, 31, -44],
+    ['b', 95.871, 8, -68, 9, -6],
+    ['k', 102.875, 8, -68, 36, -4],
+    ['E', 132.984, 10, -61, 36, -5],
+    ['i', 60.197, 9, -44, 10, -57.7],
+    ['n', 73.6, 11, -44, 36, -3],
+    ['S', 84.896, 38, -58, 8, -10]
+  ]);
+
+  const greetingPlan = penPlan([
+    ['G', 106.813, 54, -60, 33, -33],
+    ['l', 44.38, 30, -66, 11, -2],
+    ['a', 84.043, 38, -30, 45, -7],
+    ['d', 108.248, 34, -30, 35, 0],
+    ['y', 99.549, 16, -38, -5, 14],
+    ['o', 59.06, 29, -33, 27, -36],
+    ['u', 73.318, 22, -38, 36, -3],
+    ['’', 23, 23, -66, 20, -47],
+    ['r', 53.174, 22, -41, 38, -33],
+    ['e', 61.617, 13, -22, 32, -12],
+    ['h', 85.581, 30, -66, 44, -8],
+    ['.', 23, 14, -12, 13, -8]
+  ]);
+
+  async function loadPenOrder(url, plan, tileLeft) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Pen map unavailable');
+    const packed = new Uint8Array(await response.arrayBuffer());
+    const width = columns * tileWidth;
+    const pixels = new Uint8Array(width * tileHeight * Math.ceil(plan.size / columns));
+    // Each packet carries up to 128 literal or repeated samples.
+    let input = 0, output = 0;
+    while (input < packed.length) {
+      const header = packed[input++];
+      const count = (header & 127) + 1;
+      const repeat = header >= 128;
+      const end = input + (repeat ? 1 : count);
+      if (end > packed.length || output + count > pixels.length) throw new Error('Invalid pen map');
+      if (repeat) pixels.fill(packed[input], output, output + count);
+      else pixels.set(packed.subarray(input, end), output);
+      input = end;
+      output += count;
+    }
+    if (output !== pixels.length) throw new Error('Incomplete pen map');
+    return {pixels, width, plan, tileLeft};
+  }
+
+  // Build a small mask in the letter's own pixel coordinates. The native
+  // glyph supplies its contour and antialiasing without a canvas readback.
+  function prepareLetter(glyph, nib, unit, baseline, scaleX, scaleY, atlas) {
+    const top = Math.max(0, Math.floor(baseline - unit.metrics.actualBoundingBoxAscent * scaleY) - 2);
+    const bottom = Math.min(glyph.canvas.height, Math.ceil(baseline + unit.metrics.actualBoundingBoxDescent * scaleY) + 2);
+    const frame = nib.createImageData(unit.width, bottom - top);
+    const order = new Uint8Array(frame.width * frame.height);
+    const tileX = unit.pen.index % columns * tileWidth;
+    const tileY = Math.floor(unit.pen.index / columns) * tileHeight;
+    for (let y = 0; y < frame.height; y++) {
+      const row = Math.floor(((top + y + .5 - baseline) / scaleY - tileTop) * samplesPerUnit);
+      const rowStart = (tileY + row) * atlas.width + tileX;
+      for (let x = 0; x < frame.width; x++) {
+        const col = Math.floor(((x + .5 - unit.origin) / scaleX - atlas.tileLeft) * samplesPerUnit);
+        order[y * frame.width + x] = Math.min(254, atlas.pixels[rowStart + col]);
+      }
+    }
+    return progress => {
+      // A short ramp antialiases the moving tip between time steps.
+      const tip = 258 * progress;
+      for (let i = 0; i < order.length; i++) {
+        frame.data[i * 4 + 3] = 255 * Math.max(0, Math.min(1, (tip - order[i]) / 4));
+      }
+      nib.putImageData(frame, 0, top);
+      nib.globalCompositeOperation = 'source-in';
+      nib.drawImage(glyph.canvas, 0, top, frame.width, frame.height, 0, top, frame.width, frame.height);
+      nib.globalCompositeOperation = 'source-over';
+    };
+  }
+
+  // Pen coordinates use the font's 100px em. Completed ink stays on this
+  // word's fixed canvas; only the current letter's pixel rectangle is updated.
+  function makeWord(label, measure, layout, start, atlas) {
     const text = label.textContent;
-    const width = measure.measureText(text).width + layout.tracking * text.length;
-    const pad = 20; // Slanted letters can extend well past their advance.
+    const pad = 20;
     let time = start;
-    const letters = [...text].map((letter, i) => {
-      const x = measure.measureText(text.slice(0, i)).width + i * layout.tracking;
-      const passes = glyphFor(layout.strokes[letter]).map(pass => {
-        const at = time;
-        time += pass.duration;
-        return { ...pass, at };
-      });
-      const end = time;
-      time += 12; // Lift the pen between letters.
-      const native = document.createElement('span');
-      native.textContent = letter;
-      return {letter, x, passes, end, native};
+    let cursor = 0;
+    let tip;
+    const letters = [...text].map(letter => {
+      const metrics = measure.measureText(letter);
+      const x = cursor;
+      cursor += metrics.width + layout.tracking;
+      const pen = atlas.plan.get(letter);
+      if (tip) {
+        const distance = Math.hypot(x + pen.fromX - tip.x, pen.fromY - tip.y);
+        time += Math.min(15, 4 + distance * .20);
+      }
+      const start = time;
+      tip = {x: x + pen.toX, y: pen.toY};
+      time += pen.duration;
+      return {letter, x, metrics, pen, start, end: time};
     });
+
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
-    canvas.width = Math.ceil((width + 2 * pad) * layout.scale);
+    const wordWidth = cursor + 2 * pad;
+    canvas.width = Math.ceil(wordWidth * layout.scale);
     canvas.height = Math.ceil(layout.height * layout.scale);
     canvas.style.left = -pad / 100 + 'em';
     canvas.style.top = -layout.baseline / 100 + 'em';
-    canvas.style.width = (width + 2 * pad) / 100 + 'em';
+    canvas.style.width = wordWidth / 100 + 'em';
     canvas.style.height = layout.height / 100 + 'em';
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas unavailable');
-    let written = 0;
-    function draw(at, color) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.setTransform(canvas.width / (width + 2 * pad), 0, 0, canvas.height / layout.height, 0, 0);
-      ctx.font = measure.font;
-      ctx.fillStyle = color;
-      const i = letters.findIndex(unit => at < unit.end + 12);
-      const active = letters[i];
-      if (!active) return;
-      while (written < i) {
-        const previous = letters[written++].native;
-        previous.className = 'ink-mark';
-        previous.style.removeProperty('opacity');
-      }
-      // Let the native letter take over while the pen lifts. Previously the
-      // entire completed word switched from canvas to HTML on one frame.
-      const finish = Math.max(0, Math.min(1, (at - active.end + 12) / 24));
-      active.native.className = 'ink-mark';
-      active.native.style.opacity = finish;
-      canvas.style.opacity = 1 - finish;
-      ctx.save();
-      ctx.translate(pad + active.x, layout.baseline);
-      ctx.lineWidth = layout.nib;
-      ctx.lineCap = ctx.lineJoin = 'round';
-      for (const pass of active.passes) {
-        if (at <= pass.at) break;
-        const progress = Math.min(1, (at - pass.at) / pass.duration);
-        ctx.setLineDash(progress === 1 ? [] : [progress * pass.length, pass.length + 1]);
-        ctx.stroke(pass.shape);
-      }
-      // Only the active letter is masked. A slanted stroke or apostrophe can
-      // cross the next letter's advance without getting cut at a word boundary.
-      ctx.globalCompositeOperation = 'source-in';
-      ctx.fillText(active.letter, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.restore();
+
+    const scaleX = canvas.width / wordWidth;
+    const scaleY = canvas.height / layout.height;
+    const baseline = layout.baseline * scaleY;
+    let tileWidth = 1;
+    for (const unit of letters) {
+      const origin = (pad + unit.x) * scaleX;
+      // Include antialiased edges and the overhang on glyphs such as j.
+      unit.left = Math.max(0, Math.floor(origin - unit.metrics.actualBoundingBoxLeft * scaleX) - 2);
+      const right = Math.min(canvas.width, Math.ceil(origin + unit.metrics.actualBoundingBoxRight * scaleX) + 2);
+      unit.width = right - unit.left;
+      unit.origin = origin - unit.left;
+      tileWidth = Math.max(tileWidth, unit.width);
     }
-    // Anchor at the same inline baseline as the native word, including when
-    // line heights or the pixel ratio produce fractional pixel coordinates.
+    function tile() {
+      const bitmap = document.createElement('canvas');
+      bitmap.width = tileWidth;
+      bitmap.height = canvas.height;
+      const context = bitmap.getContext('2d');
+      if (!context) throw new Error('Canvas unavailable');
+      return context;
+    }
+    const paper = canvas.getContext('2d');
+    if (!paper) throw new Error('Canvas unavailable');
+    const glyph = tile();
+    const nib = tile();
+    const underlay = tile();
+    glyph.font = measure.font;
+    glyph.fillStyle = layout.color;
+
+    let next = 0;
+    let current = null;
+    let paintLetter;
+    let writtenRight = 0;
+    const wordDuration = time - start;
+    function draw(now) {
+      // Ease once across the word. Between lifts, the nib keeps moving at the
+      // same pace through a letter change as it does through a curve.
+      const wordProgress = Math.max(0, Math.min(1, (now - start) / wordDuration));
+      const eased = wordProgress + .28 * wordProgress * (1 - wordProgress) * (2 * wordProgress - 1);
+      const at = wordProgress === 1 ? time : start + wordDuration * eased;
+      while (next < letters.length) {
+        const unit = letters[next];
+        if (at < unit.start) return;
+        const w = unit.width, h = canvas.height;
+        const overlaps = unit.left < writtenRight;
+        if (current !== unit) {
+          current = unit;
+          if (overlaps) {
+            // Preserve previously written strokes that share this rectangle.
+            underlay.clearRect(0, 0, w, h);
+            underlay.drawImage(canvas, unit.left, 0, w, h, 0, 0, w, h);
+          }
+          glyph.resetTransform();
+          glyph.clearRect(0, 0, w, h);
+          glyph.setTransform(scaleX, 0, 0, scaleY, unit.origin, baseline);
+          glyph.fillText(unit.letter, 0, 0);
+          nib.clearRect(0, 0, w, h);
+          paintLetter = null;
+        }
+        const finished = at >= unit.end;
+        if (!finished) {
+          paintLetter ??= prepareLetter(glyph, nib, unit, baseline, scaleX, scaleY, atlas);
+          if (at === unit.start) return;
+          paintLetter((at - unit.start) / unit.pen.duration);
+        }
+        paper.clearRect(unit.left, 0, w, h);
+        if (overlaps) paper.drawImage(underlay.canvas, 0, 0, w, h, unit.left, 0, w, h);
+        paper.drawImage(finished ? glyph.canvas : nib.canvas, 0, 0, w, h, unit.left, 0, w, h);
+        if (!finished) return;
+        paintLetter = null;
+        writtenRight = Math.max(writtenRight, unit.left + w);
+        next++;
+      }
+    }
     const anchor = document.createElement('span');
     anchor.className = 'ink-baseline';
     anchor.append(canvas);
-    label.replaceChildren(anchor, ...letters.map(unit => unit.native));
-    return {label, start, end: time, draw};
+    label.replaceChildren(anchor, text);
+    return {start, end: time, draw};
   }
 
-  function prepare(heading, measure, strokes, nib) {
+  function prepare(heading, measure, atlas) {
     const stop = heading.closest('.street-stop');
     if (!stop || stop.dataset.inkArrived === 'complete') return;
     const text = heading.textContent;
     const words = text.trim().split(/\s+/);
-    if (words.some(word => [...word].some(letter => !strokes[letter]))) return;
+    if (words.some(word => [...word].some(letter => !atlas.plan.has(letter)))) return;
     const labels = words.map(word => {
       const label = document.createElement('span');
       label.className = 'ink-word';
@@ -149,82 +235,136 @@
     heading.classList.add('ink-prepared');
 
     const watch = new MutationObserver(start);
-    function start() {
-      if (!stop.dataset.inkArrived) return;
+    let pictures;
+    let pictureStyle;
+    function restoreText() {
       watch.disconnect();
-      if (stop.dataset.inkArrived !== 'playing') return;
+      pictures = null;
+      heading.replaceChildren(text);
+      heading.classList.remove('ink-prepared');
+      if (stop.dataset.inkArrived === 'playing') {
+        heading.dispatchEvent(new Event('street-title-written', {bubbles:true}));
+      }
+    }
+    function preparePictures() {
       const style = getComputedStyle(heading);
+      const pixelRatio = Math.min(devicePixelRatio || 1, 3);
+      const signature = [style.fontSize, style.lineHeight, style.letterSpacing, style.color, pixelRatio].join('|');
+      if (pictures && signature === pictureStyle) return;
       const size = parseFloat(style.fontSize);
       const metrics = measure.measureText('Hg');
       const height = parseFloat(style.lineHeight) * 100 / size + 70;
       const layout = {
-        strokes, nib, height, baseline:(height + metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent) / 2,
+        color: style.color, height, baseline:(height + metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent) / 2,
         tracking:(parseFloat(style.letterSpacing) || 0) * 100 / size,
-        scale:size / 100 * Math.min(devicePixelRatio || 1, 3)
+        scale:size / 100 * pixelRatio
       };
       let time = 0;
-      let pictures;
       try {
         pictures = labels.map(label => {
-          const part = makeWord(label, measure, layout, time);
+          const part = makeWord(label, measure, layout, time, atlas);
           time = part.end + 65; // Give the pen a little room to move to the next word.
           return part;
         });
+        pictureStyle = signature;
       } catch {
-        heading.replaceChildren(text);
-        heading.classList.remove('ink-prepared');
-        return;
+        restoreText();
       }
+    }
+    function start() {
+      if (!stop.dataset.inkArrived) return;
+      watch.disconnect();
+      if (stop.dataset.inkArrived !== 'playing') return;
+      preparePictures();
+      if (!pictures) return;
       let word = 0;
       const penTime = pictures[pictures.length - 1].end;
       // Keep the same rhythm for short greetings and cap the wait for long titles.
-      const duration = Math.min(3200, penTime * 1.85);
-      const began = performance.now();
+      const duration = heading.dataset.writeTitle === 'greeting' ? 3070 : Math.min(4000, penTime * 2.29);
+      let previousFrame;
+      let elapsed = 0;
       function paint(now) {
         if (stop.dataset.inkArrived !== 'playing') return;
-        const at = (now - began) * penTime / duration;
-        while (word < pictures.length && at >= pictures[word].end) {
-          pictures[word++].label.classList.add('ink-written');
-        }
-        if (word === pictures.length) {
-          heading.dispatchEvent(new Event('street-title-written', {bubbles:true}));
+        // Start on the first drawable frame. If a cold street image delays
+        // presentation, resume the stroke instead of skipping ahead a letter.
+        if (previousFrame !== undefined) elapsed += Math.min(now - previousFrame, 1000 / 30);
+        previousFrame = now;
+        const at = elapsed * penTime / duration;
+        try {
+          while (word < pictures.length && at >= pictures[word].end) {
+            pictures[word].draw(pictures[word].end);
+            word++;
+          }
+          const active = pictures[word];
+          if (active && at >= active.start) active.draw(at);
+        } catch {
+          restoreText();
           return;
         }
-        const active = pictures[word];
-        if (at >= active.start) {
-          const ink = forcedColors.matches ? style.color : document.body.style.getPropertyValue('--route-blue');
-          active.draw(at, ink || style.color);
+        if (word === pictures.length) {
+          requestAnimationFrame(() => {
+            if (stop.dataset.inkArrived === 'playing') heading.dispatchEvent(new Event('street-title-written', {bubbles:true}));
+          });
+          return;
         }
+        // Keep progress in JS so the fallback can detect a stall without a DOM mutation.
+        stop.lastInkFrameAt = now;
         requestAnimationFrame(paint);
       }
       requestAnimationFrame(paint);
     }
     watch.observe(stop, {attributes:true, attributeFilter:['data-ink-arrived']});
     start();
+    if (heading.dataset.writeTitle === 'greeting' && document.documentElement.hasAttribute('data-street-opening') && window.requestIdleCallback) {
+      requestIdleCallback(function warmGreeting(idle) {
+        if (stop.dataset.inkArrived || document.hidden) return;
+        const stage = document.querySelector('.city-stage');
+        const camera = stage?.getAnimations?.().find(animation => animation.animationName === 'needle-pullback');
+        if (!camera || camera.effect.getTiming().delay - camera.currentTime < 10) return;
+        if (idle.timeRemaining() < 6) {
+          requestIdleCallback(warmGreeting);
+          return;
+        }
+        // Use spare time in the stationary close-up to prepare the pen and its
+        // first glyph masks. At the word start the reveal mask is still empty.
+        preparePictures();
+        try {
+          pictures?.forEach(picture => picture.draw(picture.start));
+        } catch {
+          restoreText();
+        }
+      });
+    }
   }
 
-  if (!document.fonts || typeof Path2D === 'undefined' ||
-      !document.documentElement.hasAttribute('data-street-navigation-ready')) return;
-  // Both headings use the same word-by-word pen, with paths drawn for their
-  // own typeface. Fonts load independently so the flag opening never waits.
-  function loadPen(selector, family, strokes, nib) {
-    const requested = performance.now();
-    const font = '100px "' + family + '"';
-    document.fonts.load(font).then(fonts => {
-      if (!fonts.length) return;
-      const measure = document.createElement('canvas').getContext('2d');
-      if (!measure) return;
-      measure.font = font;
-      const metrics = measure.measureText('Hg');
-      if (![metrics.fontBoundingBoxAscent, metrics.fontBoundingBoxDescent].every(Number.isFinite)) return;
-      for (const heading of document.querySelectorAll(selector)) {
-        const stop = heading.closest('.street-stop');
-        // Never erase a heading that was already visible before its font arrived.
-        if (performance.now() - requested > 220 && stop.hasAttribute('data-ink-arrived')) continue;
-        prepare(heading, measure, strokes, nib);
-      }
-    }).catch(() => {});
+  if (!document.fonts || !document.documentElement.hasAttribute('data-street-navigation-ready')) return;
+  async function loadPen(selector, font, url, plan, tileLeft) {
+    const titles = document.querySelectorAll(selector);
+    if (!titles.length) return;
+    const fontReady = document.fonts.load(font, Array.from(titles, title => title.textContent).join(' '));
+    const [fonts, atlas] = await Promise.all([fontReady, loadPenOrder(url, plan, tileLeft)]);
+    if (!fonts.length) return;
+    const measure = document.createElement('canvas').getContext('2d');
+    if (!measure) return;
+    measure.font = font;
+    const metrics = measure.measureText('Hg');
+    if (![metrics.fontBoundingBoxAscent, metrics.fontBoundingBoxDescent].every(Number.isFinite)) return;
+    for (const heading of titles) {
+      const stop = heading.closest('.street-stop');
+      // A late asset must never erase a title the visitor has already seen.
+      if (!stop || (stop.dataset.inkArrived && !document.documentElement.hasAttribute('data-pen-pending'))) continue;
+      prepare(heading, measure, atlas);
+    }
   }
-  loadPen('[data-write-title=""]', 'Patrick Hand', patrickStrokes, 18);
-  loadPen('[data-write-title="greeting"]', 'Seattle Greeting Ink', caveatStrokes, 15);
+  async function loadRenderer() {
+    // Either typeface can fall back to native text independently.
+    await Promise.allSettled([
+      loadPen('[data-write-title="greeting"]', '400 100px "Seattle Greeting Ink"', 'assets/greeting-pen-order.bin?v=335f4d37fb', greetingPlan, -7),
+      loadPen('[data-write-title=""]', '375 100px "Seattle Section Ink"', 'assets/heading-pen-order.bin?v=9aa5029801', patrickPlan, -12)
+    ]);
+    document.documentElement.removeAttribute('data-pen-pending');
+  }
+  const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+  if (motion.matches) loadRenderer();
+  else motion.addEventListener('change', loadRenderer, {once:true});
 })();

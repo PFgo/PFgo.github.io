@@ -9,6 +9,8 @@
   const locationLabel = document.getElementById('street-location');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const sky = document.querySelector('.tour-sky');
+  const greeting = stops[0].querySelector('.tour-heading');
+  const greetingReader = greeting.closest('.stop-scroll');
   const stopForAnchor = new Map();
   stops.forEach((stop, index) => {
     stopForAnchor.set('#' + stop.id, index);
@@ -18,6 +20,7 @@
   let current = -1;
   let openingHoldsGreeting = false;
   let destination = null;
+  let routeFrame = 0;
   let frame = 0;
   let settleTimer = 0;
   let wheelFrame = 0;
@@ -52,8 +55,41 @@
       stop.getBoundingClientRect().left - leftEdge + rail.scrollLeft)));
   }
 
+  // Follow the hero when its biography wraps, its fonts load, or the phone rotates.
+  // Only the other stops consume these values; scrolling never needs to measure text.
+  function alignHeadings() {
+    const inset = greeting.getBoundingClientRect().top - greetingReader.getBoundingClientRect().top + greetingReader.scrollTop;
+    const size = getComputedStyle(greeting.firstElementChild).fontSize;
+    rail.style.setProperty('--greeting-inset', inset + 'px');
+    rail.style.setProperty('--greeting-size', size);
+  }
+
+  const inkTimeouts = new WeakMap();
+  const inkStallTime = 5200;
+
+  function watchPen(stop) {
+    clearTimeout(inkTimeouts.get(stop));
+    if (document.hidden) return;
+    const started = performance.now();
+    function checkProgress() {
+      const idle = performance.now() - Math.max(started, stop.lastInkFrameAt ?? 0);
+      if (idle >= inkStallTime) finishArrival(stop);
+      else inkTimeouts.set(stop, setTimeout(checkProgress, inkStallTime - idle));
+    }
+    inkTimeouts.set(stop, setTimeout(checkProgress, inkStallTime));
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    for (const stop of stops) {
+      if (stop.dataset.inkArrived === 'playing') watchPen(stop);
+    }
+  });
+
   function finishArrival(stop) {
     if (stop.dataset.inkArrived === 'complete') return;
+    clearTimeout(inkTimeouts.get(stop));
+    inkTimeouts.delete(stop);
+    delete stop.lastInkFrameAt;
     stop.dataset.inkArrived = 'complete';
     const heading = stop.querySelector('.ink-prepared[data-write-title]');
     if (heading) {
@@ -103,14 +139,16 @@
       // A fresh document starts with no visits. Finish the first reveal when
       // leaving so even a quick round trip returns to fully readable text.
       const ink = stop.dataset.inkArrived;
-      if (ink === undefined && distance <= .62 && !(index === 0 && openingHoldsGreeting)) {
+      // A direct navigation link may glide past several signs. Save their
+      // handwriting for the first time the visitor actually approaches them.
+      if (ink === undefined && distance <= .62 && (destination === null || destination === index) &&
+          !(index === 0 && openingHoldsGreeting)) {
         if (reducedMotion.matches) {
           finishArrival(stop);
         } else {
           stop.dataset.inkArrived = 'playing';
-          // Normal completion comes from the pen. Allow its longest (3.2s)
-          // title to finish before recovering from a stalled font or canvas.
-          window.setTimeout(() => finishArrival(stop), 4000);
+          // Recover static text if the renderer never starts or stops drawing.
+          watchPen(stop);
         }
       } else if (ink === 'playing' && (distance >= .86 || reducedMotion.matches)) {
         finishArrival(stop);
@@ -140,7 +178,7 @@
   function settle() {
     clearTimeout(settleTimer);
     // Instant writes during a translated wheel glide can each emit scrollend.
-    if (resizePosition !== null || wheelTarget !== null ||
+    if (resizePosition !== null || wheelTarget !== null || routeFrame ||
         destination !== null && Math.abs(rail.scrollLeft - offsets[destination]) > 1.5) return;
     const quietIn = wheelIdleUntil - performance.now();
     if (quietIn > 0) {
@@ -188,10 +226,17 @@
     }
   }
 
+  function cancelRoute() {
+    cancelAnimationFrame(routeFrame);
+    routeFrame = 0;
+    destination = null;
+  }
+
   function navigate(index, {instant = false, push = false, focus = false, hash} = {}) {
     if (index < 0 || index >= stops.length) return;
     endResize();
     cancelWheel();
+    cancelRoute();
     wheelIdleUntil = 0;
     clearTimeout(settleTimer);
     hash ??= '#' + stops[index].id;
@@ -199,13 +244,33 @@
       history.pushState(history.state, '', hash);
     }
     destination = index;
-    rail.scrollTo({left:offsets[index], behavior:instant || reducedMotion.matches ? 'instant' : 'smooth'});
+    const start = rail.scrollLeft;
+    const distance = offsets[index] - start;
     if (focus) {
       const heading = stops[index].querySelector('h1,h2') ?? stops[index];
       heading.setAttribute('tabindex', '-1');
       heading.focus({preventScroll:true});
     }
-    if (Math.abs(rail.scrollLeft - offsets[index]) < 1) settle();
+    if (instant || reducedMotion.matches || Math.abs(distance) <= 1) {
+      rail.scrollTo({left:offsets[index], behavior:'instant'});
+      settle();
+      return;
+    }
+    // Use the same camera timing in Safari and Chrome. Longer trips get
+    // more time without making a visitor wait separately for each stop.
+    const duration = Math.min(900, 360 + 300 * Math.sqrt(Math.abs(distance) / width));
+    const started = performance.now();
+    function glide(now) {
+      const t = Math.max(0, Math.min(1, (now - started) / duration));
+      const eased = t * t * (3 - 2 * t);
+      rail.scrollTo({left:start + distance * eased, behavior:'instant'});
+      if (t < 1) routeFrame = requestAnimationFrame(glide);
+      else {
+        routeFrame = 0;
+        settle();
+      }
+    }
+    routeFrame = requestAnimationFrame(glide);
   }
 
   function step(direction, focus = false) {
@@ -261,7 +326,10 @@
     tabbing = false;
     endResize();
     cancelWheel();
-    if (rail.contains(event.target)) destination = null;
+    if (rail.contains(event.target) && routeFrame) {
+      cancelRoute();
+      settle();
+    }
   }, {passive:true});
   rail.addEventListener('focusin', event => {
     if (!tabbing || !event.target.closest) return;
@@ -272,14 +340,18 @@
   });
 
   document.addEventListener('wheel', event => {
-    if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey ||
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey ||
         event.altKey || event.shiftKey || document.querySelector('dialog[open]')) return;
     const horizontal = Math.abs(event.deltaX) >= Math.abs(event.deltaY);
     const inside = rail.contains(event.target);
     // Let the browser carry horizontal trackpad momentum and touch scrolling
     // on the rail. The header and footer have no horizontal scroller of their own.
     endResize();
-    destination = null;
+    if (routeFrame) {
+      cancelRoute();
+      settle();
+    }
+    if (!event.cancelable) return;
     if (inside && horizontal) { cancelWheel(); return; }
     const reader = event.target instanceof Element && event.target.closest('.stop-scroll');
     if (reader && !horizontal && (event.deltaY < 0 ? reader.scrollTop > 1 :
@@ -313,6 +385,7 @@
   }, {passive:true});
   if (nativeScrollEnd) rail.addEventListener('scrollend', settle);
   reducedMotion.addEventListener('change', () => {
+    if (reducedMotion.matches && routeFrame) navigate(destination, {instant:true});
     if (!frame) frame = requestAnimationFrame(paint);
   });
   window.addEventListener('popstate', onHistory);
@@ -342,6 +415,7 @@
     // point between landmarks throughout the resize, including scroll events
     // the browser generates while it clamps the old viewport's offset.
     resizePosition ??= destination ?? routePosition;
+    cancelRoute();
     cancelWheel();
     measure();
     restorePosition();
@@ -355,10 +429,62 @@
     if (!frame) frame = requestAnimationFrame(paint);
   }
 
-  function playOpening() {
+  const stage = rail.querySelector('.city-stage');
+  const panorama = stage.querySelector('.city-painted-world');
+
+  function loadPanorama(decodeForOpening) {
+    return new Promise(resolve => {
+      let fallbacks;
+      function trySmallerImage() {
+        if (!fallbacks) {
+          // The markup lists candidates from smallest to largest. Only retry
+          // below the failed resolution and retain normal srcset on success.
+          const candidates = panorama.srcset.split(',').filter(Boolean).map(candidate =>
+            new URL(candidate.trim().split(/\s+/)[0], document.baseURI).href);
+          const selected = candidates.indexOf(panorama.currentSrc || panorama.src);
+          fallbacks = (selected < 0 ? candidates : candidates.slice(0, selected)).reverse();
+          fallbacks.push('assets/street-overview.webp');
+        }
+        const next = fallbacks.shift();
+        if (next) {
+          panorama.src = next;
+          panorama.removeAttribute('srcset');
+          return;
+        }
+        // A street without its ground should not leave loose actors on the sky.
+        stage.hidden = true;
+        panorama.removeEventListener('error', failed);
+        panorama.removeEventListener('load', loaded);
+        resolve(null);
+      }
+      function failed() {
+        if (panorama.complete && !panorama.naturalWidth) trySmallerImage();
+      }
+      function ready() {
+        panorama.removeEventListener('load', loaded);
+        resolve(panorama);
+      }
+      function loaded() {
+        const candidate = panorama.currentSrc;
+        // An ordinary responsive source change can abort a pending decode.
+        // Let its replacement load instead of retrying the obsolete candidate.
+        panorama.decode().then(ready, () => {
+          if (panorama.complete && panorama.naturalWidth && panorama.currentSrc === candidate) trySmallerImage();
+        });
+      }
+      panorama.addEventListener('error', failed);
+      if (decodeForOpening && panorama.decode) {
+        panorama.addEventListener('load', loaded);
+        if (panorama.complete && panorama.naturalWidth) loaded();
+      } else {
+        resolve(panorama);
+      }
+      failed();
+    });
+  }
+
+  function playOpening(sharp) {
     const root = document.documentElement;
-    const stage = rail.querySelector('.city-stage');
-    const panorama = stage.querySelector('.city-painted-world');
     const banner = stage.querySelector('.needle-banner');
     const view = rail.getBoundingClientRect();
     const street = stage.getBoundingClientRect();
@@ -389,7 +515,7 @@
     }
     function finish(interrupted = true) {
       if (signal.aborted) return;
-      controls.abort();
+      controls.abort(Boolean(interrupted));
       clearTimeout(deadline);
       if (interrupted) finishArrival(stops[0]);
       releaseGreeting();
@@ -397,8 +523,9 @@
       stage.style.removeProperty('--flag-framing');
       document.dispatchEvent(new Event('street-opening-end'));
     }
-    root.dataset.streetOpening = 'flag';
-    const deadline = setTimeout(() => finish(false), 2700);
+    root.dataset.streetOpening = 'loading';
+    // A failed or stalled backdrop should never keep the navigation hidden.
+    let deadline = setTimeout(finish, 1500);
     stops[0].addEventListener('animationstart', event => {
       if (event.animationName === 'opening-greeting') releaseGreeting();
     }, {signal});
@@ -408,35 +535,73 @@
     for (const type of ['wheel','touchmove','keydown','click','focusin']) {
       document.addEventListener(type, finish, {capture:true, passive:true, signal});
     }
-    for (const type of ['hashchange','popstate','pagehide','resize']) {
+    for (const type of ['hashchange','popstate','pagehide']) {
       window.addEventListener(type, finish, {signal});
     }
+    const startWidth = window.innerWidth, startHeight = window.innerHeight;
+    window.addEventListener('resize', () => {
+      // A small height change from the mobile address bar can finish naturally.
+      if (window.innerWidth !== startWidth || Math.abs(window.innerHeight - startHeight) > 64) finish();
+    }, {signal});
     document.addEventListener('visibilitychange', finish, {signal});
     reducedMotion.addEventListener('change', finish, {signal});
 
-    if (!panorama.complete || !panorama.naturalWidth) {
-      // The inline flag is ready immediately, even on the first uncached visit.
-      stage.classList.add('opening-facades');
-      const revealPaint = () => stage.classList.remove('opening-facades');
-      panorama.addEventListener('load', () => {
-        if (panorama.decode) panorama.decode().then(revealPaint, revealPaint);
-        else revealPaint();
-      }, {once:true});
+    if (!panorama.decode) {
+      finish();
+      return;
     }
+    const preview = stage.querySelector('.opening-preview');
+    // A cached image's load event can precede decode. Start the clock with a
+    // drawable building behind the cloth, whichever image is ready first.
+    Promise.any([sharp, preview.decode().then(() => preview)]).then(ready => {
+      if (signal.aborted) return;
+      if (!ready) return finish();
+      if (ready === preview) {
+        stage.classList.add('opening-facades');
+        const earlyFadeDeadline = performance.now() + 500;
+        const settled = new Promise(resolve => signal.addEventListener('abort', resolve, {once:true}));
+        sharp.then(async image => {
+          // Swap detail while the camera is still, or after it comes to rest.
+          if (image) {
+            if (performance.now() >= earlyFadeDeadline) await settled;
+            if (signal.reason !== true && !document.hidden && !reducedMotion.matches && panorama.animate) {
+              const fade = panorama.animate([{opacity:0}, {opacity:1}], {duration:240, easing:'ease-out'});
+              await fade.finished.catch(() => {});
+            }
+          } else {
+            finish();
+          }
+          stage.classList.remove('opening-facades');
+        });
+      }
+      root.dataset.streetOpening = 'flag';
+      clearTimeout(deadline);
+      // animationend normally releases the street; recover if CSS is interrupted.
+      deadline = setTimeout(() => finish(false), 4000);
+    }, () => finish());
   }
 
   document.documentElement.setAttribute('data-street-navigation-ready', '');
   measure();
+  alignHeadings();
   const initial = routeIndex(location.hash);
-  openingHoldsGreeting = initial === 0 && ['', '#about', '#home'].includes(location.hash) &&
-      !reducedMotion.matches && !document.hidden &&
-      performance.getEntriesByType('navigation')[0]?.type !== 'back_forward';
+  openingHoldsGreeting = initial === 0 && document.documentElement.hasAttribute('data-opening-pending') &&
+      !reducedMotion.matches && !document.hidden;
+  const firstPaint = loadPanorama(openingHoldsGreeting);
   navigate(initial < 0 ? 0 : initial, {instant:true});
-  if (openingHoldsGreeting) playOpening();
+  if (openingHoldsGreeting) playOpening(firstPaint);
+  document.documentElement.removeAttribute('data-opening-pending');
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(() => resize());
     observer.observe(rail);
     observer.observe(stops[0].parentElement);
+    const headingObserver = new ResizeObserver(alignHeadings);
+    headingObserver.observe(greetingReader);
+    headingObserver.observe(greeting.parentElement);
+    headingObserver.observe(greeting);
+  } else {
+    window.addEventListener('resize', alignHeadings);
+    document.fonts?.ready.then(alignHeadings);
   }
   window.addEventListener('resize', () => resize(true));
 })();

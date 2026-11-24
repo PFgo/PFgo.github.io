@@ -13,6 +13,7 @@
   }
   const paint = stop => {
     for (const image of stop.querySelectorAll('[data-street-src]')) {
+      image.decoding = 'async';
       image.src = image.dataset.streetSrc;
     }
     for (const image of stop.querySelectorAll('[data-street-href]')) {
@@ -28,7 +29,8 @@
         observer.unobserve(entry.target);
       }
     };
-    const scenery = new IntersectionObserver(onApproach, { root: rail, rootMargin: '0px 120px' });
+    // Give the next block's illustrations a head start on wider screens.
+    const scenery = new IntersectionObserver(onApproach, { root: rail, rootMargin: '0px 32%' });
     // The navigation script switches from the static page to its horizontal rail.
     // Measuring sooner can make a slow first visit download the entire static view.
     const watch = () => {

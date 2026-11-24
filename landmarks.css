@@ -11,30 +11,7 @@
     overflow: hidden;
     contain: paint;
   }
-  /* The original painting contains the still fountain. Decode its moving
-     water only on approach, and slide one isolated atlas through the window. */
-  .drumheller-water[data-water-ready]::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto auto 0;
-    width: 800%;
-    height: 600%;
-    background: url("assets/fountain-water-atlas.webp") 0 0 / 100% 100% no-repeat;
-    animation: fountain-columns 400ms steps(8, end) infinite,
-               fountain-rows 2400ms steps(6, end) infinite;
-  }
-  .city-stage[data-street-paused] .drumheller-water::before,
-  .drumheller-water[data-out-of-view]::before {
-    animation-play-state: paused;
-  }
-}
-@keyframes fountain-columns {
-  from { translate: 0 0; }
-  to { translate: -100% 0; }
-}
-@keyframes fountain-rows {
-  from { transform: translateY(0); }
-  to { transform: translateY(-100%); }
+  .drumheller-water:not([data-water-ready]) { visibility: hidden; }
 }
 
 .street-tree {

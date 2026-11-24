@@ -5,19 +5,47 @@
   <meta name="theme-color" content="#faf8f1">
   <meta name="description" content="Dave Guo’s portfolio, projects, and education in Seattle.">
   <title>Dave Guo</title>
+  <script>
+    // Reserve the headings before first paint while their ink and font load.
+    if (!document.hidden && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      document.documentElement.setAttribute('data-pen-pending', '');
+      const showTitle = () => document.documentElement.removeAttribute('data-pen-pending');
+      document.addEventListener('DOMContentLoaded', () => setTimeout(showTitle, 450), {once:true});
+      setTimeout(showTitle, 1600);
+    }
+    // Keep the time-of-day sky on screen until the flag camera has its first frame.
+    if (['', '#about', '#home'].includes(location.hash) && !document.hidden &&
+        matchMedia('(prefers-reduced-motion: no-preference)').matches &&
+        performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
+      const root = document.documentElement;
+      root.setAttribute('data-opening-pending', '');
+      const backdrop = document.createElement('link');
+      backdrop.rel = 'preload';
+      backdrop.as = 'image';
+      backdrop.href = 'assets/street-overview.webp';
+      document.head.append(backdrop);
+      const showPage = () => root.removeAttribute('data-opening-pending');
+      const timeout = setTimeout(showPage, 1500);
+      document.addEventListener('DOMContentLoaded', () => { clearTimeout(timeout); showPage(); }, {once:true});
+      window.addEventListener('pagehide', showPage, {once:true});
+    }
+  </script>
+  <link rel="preload" href="assets/seattle-greeting-ink.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/greeting-pen-order.bin?v=335f4d37fb" as="fetch" crossorigin media="(prefers-reduced-motion: no-preference)">
   <link rel="preload" href="assets/patrick-hand.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/heading-pen-order.bin?v=9aa5029801" as="fetch" crossorigin media="(prefers-reduced-motion: no-preference)">
   <link rel="preload" href="assets/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="home.css?v=7d5d79535d">
-  <link rel="stylesheet" href="tour.css?v=688bdcecfd">
-  <link rel="stylesheet" href="market-stop.css?v=44adade8f6">
-  <link rel="stylesheet" href="landmarks.css?v=66ae4152df">
-  <link rel="stylesheet" href="heading-ink.css?v=a8a6cb3cc4">
+  <link rel="stylesheet" href="tour.css?v=0e2ec23499">
+  <link rel="stylesheet" href="market-stop.css?v=20efc66c5b">
+  <link rel="stylesheet" href="landmarks.css?v=3484fa590b">
+  <link rel="stylesheet" href="heading-ink.css?v=046c2a5dd3">
   <noscript><style>.street-tree { background: url("assets/tree-cherry.webp") center / 100% 100% no-repeat; }</style></noscript>
-  <script defer src="street-art.js?v=10d4b751a1"></script>
-  <script defer src="home.js?v=ce7c616332"></script>
+  <script defer src="street-navigation.js?v=1256f3bf03"></script>
+  <script defer src="street-art.js?v=4f59586f19"></script>
+  <script defer src="home.js?v=60c14f6999"></script>
   <script defer src="harbor-wheel.js?v=97716d2bb2"></script>
-  <script defer src="street-navigation.js?v=7c0fa8272c"></script>
-  <script defer src="heading-ink.js?v=9d586f2d3e"></script>
+  <script defer src="heading-ink.js?v=27db7df1b8"></script>
 </head>
 <body class="street-page">
 <a class="skip" href="#about-title">Skip to introduction</a>
@@ -27,7 +55,7 @@
   </div>
   <header class="tour-header">
     <a href="#about" class="city-label" aria-label="Seattle, back to the beginning"><i class="compass" aria-hidden="true"></i><span>Seattle, WA</span></a>
-    <nav class="route-nav" aria-label="Along the street"><a data-route href="#about">About</a><a data-route href="#work">Projects</a><a data-route href="#experience">Experience</a><a data-route href="#contact">Say hi</a></nav>
+    <nav class="route-nav" aria-label="Along the street"><a data-route href="#about">About</a><a data-route href="#work">Projects</a><a data-route href="#experience">Education</a><a data-route href="#contact">Say hi</a></nav>
   </header>
   <script>
     (() => {
@@ -163,7 +191,8 @@
   <main id="street-rail" tabindex="-1" aria-label="Dave’s Seattle street">
     <div class="street-world">
       <div class="seattle-stage city-stage" role="img" aria-label="An illustrated Seattle street. A flag on the Space Needle reads “Open to work”. Walk past Pike Place Market, Suzzallo Library and Drumheller Fountain to the Great Wheel and ferry on Elliott Bay.">
-        <img class="city-painted-world" onload="this.setAttribute('data-painted', '')" onerror="this.removeAttribute('data-painted')" src="assets/seattle-promenade.webp?v=landmark-motion01" srcset="assets/seattle-promenade-small.webp?v=landmark-motion01 4200w, assets/seattle-promenade-medium.webp?v=landmark-motion01 5040w, assets/seattle-promenade.webp?v=landmark-motion01 8400w" sizes="(scripting: none) 100vw, (max-width: 700px) and (orientation: portrait) min(421.8vw, 364.8dvh), (max-width: 700px) and (max-height: 430px) max(292.6vw, min(490.2vw, 364.8dvh)), (max-width: 700px) min(490.2vw, 364.8dvh), max(273.6vw, min(364.8vw, 547.2dvh))" alt="" width="8400" height="724" fetchpriority="high">
+        <img class="opening-preview" src="assets/street-overview.webp" width="1280" height="110" alt="" decoding="async" onload="this.setAttribute('data-painted', '')">
+        <img class="city-painted-world" onload="this.setAttribute('data-painted', '')" onerror="this.removeAttribute('data-painted')" src="assets/seattle-promenade.webp?v=landmark-motion01" srcset="assets/seattle-promenade-small.webp?v=landmark-motion01 4200w, assets/seattle-promenade-medium.webp?v=landmark-motion01 5040w, assets/seattle-promenade.webp?v=landmark-motion01 8400w" sizes="(scripting: none) 100vw, (max-width: 700px) and (orientation: portrait) min(400.71vw, 346.56dvh), (max-width: 700px) and (max-height: 430px) max(277.97vw, min(465.69vw, 346.56dvh)), (max-width: 700px) min(465.69vw, 346.56dvh), max(259.92vw, min(346.56vw, 519.84dvh))" alt="" width="8400" height="724" decoding="async" fetchpriority="high">
         <span class="street-window-lights" aria-hidden="true"></span>
         <span class="market-neon" aria-hidden="true"></span>
         <svg class="needle-banner" data-landmark aria-hidden="true" focusable="false" viewBox="0 0 210 74">
@@ -175,42 +204,114 @@
                 from="-.92 0" to="0 0" begin="indefinite" dur="2.8s" repeatCount="indefinite"/>
             </linearGradient>
             <!-- Both hems follow the same passing crest. The stitches reuse their outlines. -->
-            <path id="banner-face-shape" d="M8 15 C47 2.9 76 6.8 108 12.7 C133 19.1 150 18.2 169 14.1 L168 62 C148 67.9 126 66.3 101 59.3 C68 53 37 54.3 8 64 Z">
+            <path id="banner-face-shape" d="M8 15 C47 2.87 76 6.85 108 12.69 C133 19.12 150 18.16 169 14.06 L168 61.98 C148 67.92 126 66.33 101 59.27 C68 53.02 37 54.32 8 64 Z">
               <animate data-breeze attributeName="d" begin="indefinite" dur="2.8s" repeatCount="indefinite"
-                values="M8 15 C47 2.9 76 6.8 108 12.7 C133 19.1 150 18.2 169 14.1 L168 62 C148 67.9 126 66.3 101 59.3 C68 53 37 54.3 8 64 Z;
-                  M8 15 C47 3.6 76 7 108 10.9 C133 16 150 14.8 169 11.4 L168 59.3 C148 64.5 126 63.5 101 58 C68 53.5 37 55 8 64 Z;
-                  M8 15 C47 4.6 76 8.4 108 11 C133 14 150 11.5 169 7.4 L168 55.2 C148 61.4 126 62.1 101 58.5 C68 54.9 37 55.7 8 64 Z;
-                  M8 15 C47 5.2 76 10.1 108 12.8 C133 14.4 150 10.3 169 4.3 L168 52.2 C148 60.4 126 63 101 60.4 C68 56.3 37 56 8 64 Z;
-                  M8 15 C47 5.1 76 11.2 108 15.3 C133 16.9 150 11.8 169 3.9 L168 52 C148 62.1 126 65.7 101 62.7 C68 57 37 55.7 8 64 Z;
-                  M8 15 C47 4.4 76 11 108 17.1 C133 20 150 15.2 169 6.6 L168 54.7 C148 65.5 126 68.5 101 64 C68 56.5 37 55 8 64 Z;
-                  M8 15 C47 3.4 76 9.6 108 17 C133 22 150 18.5 169 10.6 L168 58.8 C148 68.6 126 69.9 101 63.5 C68 55.1 37 54.3 8 64 Z;
-                  M8 15 C47 2.8 76 7.9 108 15.2 C133 21.6 150 19.7 169 13.7 L168 61.8 C148 69.6 126 69 101 61.6 C68 53.7 37 54 8 64 Z;
-                  M8 15 C47 2.9 76 6.8 108 12.7 C133 19.1 150 18.2 169 14.1 L168 62 C148 67.9 126 66.3 101 59.3 C68 53 37 54.3 8 64 Z"/>
+                values="M8 15 C47 2.87 76 6.85 108 12.69 C133 19.12 150 18.16 169 14.06 L168 61.98 C148 67.92 126 66.33 101 59.27 C68 53.02 37 54.32 8 64 Z;
+                  M8 15 C47 3.02 76 6.77 108 12.12 C133 18.32 150 17.42 169 13.64 L168 61.54 C148 67.17 126 65.56 101 58.81 C68 53.04 37 54.46 8 64 Z;
+                  M8 15 C47 3.2 76 6.77 108 11.63 C133 17.52 150 16.59 169 13.05 L168 60.93 C148 66.33 126 64.82 101 58.43 C68 53.12 37 54.63 8 64 Z;
+                  M8 15 C47 3.41 76 6.86 108 11.23 C133 16.73 150 15.7 169 12.3 L168 60.16 C148 65.44 126 64.11 101 58.15 C68 53.28 37 54.81 8 64 Z;
+                  M8 15 C47 3.64 76 7.03 108 10.93 C133 15.98 150 14.79 169 11.42 L168 59.28 C148 64.54 126 63.49 101 57.98 C68 53.51 37 54.99 8 64 Z;
+                  M8 15 C47 3.89 76 7.28 108 10.75 C133 15.32 150 13.88 169 10.45 L168 58.31 C148 63.65 126 62.95 101 57.93 C68 53.79 37 55.18 8 64 Z;
+                  M8 15 C47 4.14 76 7.59 108 10.7 C133 14.76 150 13.01 169 9.43 L168 57.28 C148 62.81 126 62.54 101 58 C68 54.12 37 55.36 8 64 Z;
+                  M8 15 C47 4.39 76 7.96 108 10.77 C133 14.32 150 12.22 169 8.39 L168 56.25 C148 62.06 126 62.26 101 58.18 C68 54.48 37 55.53 8 64 Z;
+                  M8 15 C47 4.62 76 8.36 108 10.97 C133 14.03 150 11.54 169 7.37 L168 55.24 C148 61.42 126 62.12 101 58.47 C68 54.86 37 55.67 8 64 Z;
+                  M8 15 C47 4.83 76 8.8 108 11.29 C133 13.89 150 10.99 169 6.41 L168 54.31 C148 60.92 126 62.13 101 58.85 C68 55.25 37 55.79 8 64 Z;
+                  M8 15 C47 5.01 76 9.24 108 11.7 C133 13.9 150 10.59 169 5.56 L168 53.47 C148 60.58 126 62.29 101 59.32 C68 55.63 37 55.88 8 64 Z;
+                  M8 15 C47 5.14 76 9.67 108 12.21 C133 14.08 150 10.37 169 4.83 L168 52.77 C148 60.4 126 62.59 101 59.86 C68 55.98 37 55.94 8 64 Z;
+                  M8 15 C47 5.24 76 10.07 108 12.79 C133 14.4 150 10.32 169 4.27 L168 52.24 C148 60.4 126 63.03 101 60.43 C68 56.3 37 55.96 8 64 Z;
+                  M8 15 C47 5.28 76 10.44 108 13.41 C133 14.86 150 10.45 169 3.89 L168 51.88 C148 60.58 126 63.57 101 61.03 C68 56.57 37 55.94 8 64 Z;
+                  M8 15 C47 5.28 76 10.74 108 14.05 C133 15.45 150 10.76 169 3.7 L168 51.73 C148 60.93 126 64.21 101 61.63 C68 56.77 37 55.89 8 64 Z;
+                  M8 15 C47 5.23 76 10.99 108 14.69 C133 16.13 150 11.23 169 3.72 L168 51.77 C148 61.44 126 64.92 101 62.2 C68 56.91 37 55.8 8 64 Z;
+                  M8 15 C47 5.13 76 11.15 108 15.31 C133 16.88 150 11.84 169 3.94 L168 52.02 C148 62.08 126 65.67 101 62.73 C68 56.98 37 55.68 8 64 Z;
+                  M8 15 C47 4.98 76 11.23 108 15.88 C133 17.68 150 12.58 169 4.36 L168 52.46 C148 62.83 126 66.44 101 63.19 C68 56.96 37 55.54 8 64 Z;
+                  M8 15 C47 4.8 76 11.23 108 16.37 C133 18.48 150 13.41 169 4.95 L168 53.07 C148 63.67 126 67.18 101 63.57 C68 56.88 37 55.37 8 64 Z;
+                  M8 15 C47 4.59 76 11.14 108 16.77 C133 19.27 150 14.3 169 5.7 L168 53.84 C148 64.56 126 67.89 101 63.85 C68 56.72 37 55.19 8 64 Z;
+                  M8 15 C47 4.36 76 10.97 108 17.07 C133 20.02 150 15.21 169 6.58 L168 54.72 C148 65.46 126 68.51 101 64.02 C68 56.49 37 55.01 8 64 Z;
+                  M8 15 C47 4.11 76 10.72 108 17.25 C133 20.68 150 16.12 169 7.55 L168 55.69 C148 66.35 126 69.05 101 64.07 C68 56.21 37 54.82 8 64 Z;
+                  M8 15 C47 3.86 76 10.41 108 17.3 C133 21.24 150 16.99 169 8.57 L168 56.72 C148 67.19 126 69.46 101 64 C68 55.88 37 54.64 8 64 Z;
+                  M8 15 C47 3.61 76 10.04 108 17.23 C133 21.68 150 17.78 169 9.61 L168 57.75 C148 67.94 126 69.74 101 63.82 C68 55.52 37 54.47 8 64 Z;
+                  M8 15 C47 3.38 76 9.64 108 17.03 C133 21.97 150 18.46 169 10.63 L168 58.76 C148 68.58 126 69.88 101 63.53 C68 55.14 37 54.33 8 64 Z;
+                  M8 15 C47 3.17 76 9.2 108 16.71 C133 22.11 150 19.01 169 11.59 L168 59.69 C148 69.08 126 69.87 101 63.15 C68 54.75 37 54.21 8 64 Z;
+                  M8 15 C47 2.99 76 8.76 108 16.3 C133 22.1 150 19.41 169 12.44 L168 60.53 C148 69.42 126 69.71 101 62.68 C68 54.37 37 54.12 8 64 Z;
+                  M8 15 C47 2.86 76 8.33 108 15.79 C133 21.92 150 19.63 169 13.17 L168 61.23 C148 69.6 126 69.41 101 62.14 C68 54.02 37 54.06 8 64 Z;
+                  M8 15 C47 2.76 76 7.93 108 15.21 C133 21.6 150 19.68 169 13.73 L168 61.76 C148 69.6 126 68.97 101 61.57 C68 53.7 37 54.04 8 64 Z;
+                  M8 15 C47 2.72 76 7.56 108 14.59 C133 21.14 150 19.55 169 14.11 L168 62.12 C148 69.42 126 68.43 101 60.97 C68 53.43 37 54.06 8 64 Z;
+                  M8 15 C47 2.72 76 7.26 108 13.95 C133 20.55 150 19.24 169 14.3 L168 62.27 C148 69.07 126 67.79 101 60.37 C68 53.23 37 54.11 8 64 Z;
+                  M8 15 C47 2.77 76 7.01 108 13.31 C133 19.87 150 18.77 169 14.28 L168 62.23 C148 68.56 126 67.08 101 59.8 C68 53.09 37 54.2 8 64 Z;
+                  M8 15 C47 2.87 76 6.85 108 12.69 C133 19.12 150 18.16 169 14.06 L168 61.98 C148 67.92 126 66.33 101 59.27 C68 53.02 37 54.32 8 64 Z"/>
             </path>
             <!-- The ink baseline sits 68% of the way between the two hems at each control point. -->
-            <path id="banner-ink-right" d="M8 48.3 C40.2 37.9 70.6 38.2 103.2 44.4 C128.2 51.2 148.6 52 168.3 46.7">
+            <path id="banner-ink-right" d="M8 48.32 C40.2 37.86 70.56 38.25 103.24 44.36 C128.24 51.22 148.64 52 168.32 46.64">
               <animate data-breeze attributeName="d" begin="indefinite" dur="2.8s" repeatCount="indefinite"
-                values="M8 48.3 C40.2 37.9 70.6 38.2 103.2 44.4 C128.2 51.2 148.6 52 168.3 46.7;
-                  M8 48.3 C40.2 38.6 70.6 38.6 103.2 42.9 C128.2 48.3 148.6 48.6 168.3 44;
-                  M8 48.3 C40.2 39.3 70.6 40 103.2 43.3 C128.2 46.7 148.6 45.4 168.3 39.9;
-                  M8 48.3 C40.2 39.7 70.6 41.5 103.2 45.2 C128.2 47.4 148.6 44.4 168.3 36.9;
-                  M8 48.3 C40.2 39.5 70.6 42.3 103.2 47.5 C128.2 50.1 148.6 46 168.3 36.6;
-                  M8 48.3 C40.2 38.8 70.6 41.9 103.2 49 C128.2 53 148.6 49.4 168.3 39.3;
-                  M8 48.3 C40.2 38 70.6 40.5 103.2 48.6 C128.2 54.6 148.6 52.6 168.3 43.4;
-                  M8 48.3 C40.2 37.6 70.6 39 103.2 46.8 C128.2 53.8 148.6 53.6 168.3 46.4;
-                  M8 48.3 C40.2 37.9 70.6 38.2 103.2 44.4 C128.2 51.2 148.6 52 168.3 46.7"/>
+                values="M8 48.32 C40.2 37.86 70.56 38.25 103.24 44.36 C128.24 51.22 148.64 52 168.32 46.64;
+                  M8 48.32 C40.2 38 70.56 38.23 103.24 43.87 C128.24 50.45 148.64 51.25 168.32 46.21;
+                  M8 48.32 C40.2 38.17 70.56 38.29 103.24 43.45 C128.24 49.68 148.64 50.41 168.32 45.61;
+                  M8 48.32 C40.2 38.36 70.56 38.43 103.24 43.14 C128.24 48.95 148.64 49.53 168.32 44.85;
+                  M8 48.32 C40.2 38.56 70.56 38.63 103.24 42.93 C128.24 48.29 148.64 48.62 168.32 43.96;
+                  M8 48.32 C40.2 38.77 70.56 38.9 103.24 42.83 C128.24 47.71 148.64 47.72 168.32 42.99;
+                  M8 48.32 C40.2 38.97 70.56 39.23 103.24 42.86 C128.24 47.25 148.64 46.88 168.32 41.97;
+                  M8 48.32 C40.2 39.16 70.56 39.59 103.24 43.01 C128.24 46.92 148.64 46.11 168.32 40.93;
+                  M8 48.32 C40.2 39.34 70.56 39.98 103.24 43.27 C128.24 46.73 148.64 45.46 168.32 39.92;
+                  M8 48.32 C40.2 39.48 70.56 40.39 103.24 43.63 C128.24 46.69 148.64 44.94 168.32 38.98;
+                  M8 48.32 C40.2 39.6 70.56 40.78 103.24 44.08 C128.24 46.81 148.64 44.58 168.32 38.14;
+                  M8 48.32 C40.2 39.68 70.56 41.16 103.24 44.61 C128.24 47.07 148.64 44.39 168.32 37.43;
+                  M8 48.32 C40.2 39.73 70.56 41.51 103.24 45.19 C128.24 47.47 148.64 44.38 168.32 36.89;
+                  M8 48.32 C40.2 39.73 70.56 41.8 103.24 45.79 C128.24 47.99 148.64 44.54 168.32 36.53;
+                  M8 48.32 C40.2 39.69 70.56 42.04 103.24 46.41 C128.24 48.61 148.64 44.88 168.32 36.36;
+                  M8 48.32 C40.2 39.62 70.56 42.21 103.24 47 C128.24 49.31 148.64 45.37 168.32 36.4;
+                  M8 48.32 C40.2 39.5 70.56 42.31 103.24 47.56 C128.24 50.06 148.64 46 168.32 36.64;
+                  M8 48.32 C40.2 39.36 70.56 42.33 103.24 48.05 C128.24 50.83 148.64 46.75 168.32 37.07;
+                  M8 48.32 C40.2 39.19 70.56 42.27 103.24 48.47 C128.24 51.6 148.64 47.59 168.32 37.67;
+                  M8 48.32 C40.2 39 70.56 42.13 103.24 48.78 C128.24 52.33 148.64 48.47 168.32 38.43;
+                  M8 48.32 C40.2 38.8 70.56 41.93 103.24 48.99 C128.24 52.99 148.64 49.38 168.32 39.32;
+                  M8 48.32 C40.2 38.59 70.56 41.66 103.24 49.09 C128.24 53.57 148.64 50.28 168.32 40.29;
+                  M8 48.32 C40.2 38.39 70.56 41.33 103.24 49.06 C128.24 54.03 148.64 51.12 168.32 41.31;
+                  M8 48.32 C40.2 38.2 70.56 40.97 103.24 48.91 C128.24 54.36 148.64 51.89 168.32 42.35;
+                  M8 48.32 C40.2 38.02 70.56 40.58 103.24 48.65 C128.24 54.55 148.64 52.54 168.32 43.36;
+                  M8 48.32 C40.2 37.88 70.56 40.17 103.24 48.29 C128.24 54.59 148.64 53.06 168.32 44.3;
+                  M8 48.32 C40.2 37.76 70.56 39.78 103.24 47.84 C128.24 54.47 148.64 53.42 168.32 45.14;
+                  M8 48.32 C40.2 37.68 70.56 39.4 103.24 47.31 C128.24 54.21 148.64 53.61 168.32 45.85;
+                  M8 48.32 C40.2 37.63 70.56 39.05 103.24 46.73 C128.24 53.81 148.64 53.62 168.32 46.39;
+                  M8 48.32 C40.2 37.63 70.56 38.76 103.24 46.13 C128.24 53.29 148.64 53.46 168.32 46.75;
+                  M8 48.32 C40.2 37.67 70.56 38.52 103.24 45.51 C128.24 52.67 148.64 53.12 168.32 46.92;
+                  M8 48.32 C40.2 37.74 70.56 38.35 103.24 44.92 C128.24 51.97 148.64 52.63 168.32 46.88;
+                  M8 48.32 C40.2 37.86 70.56 38.25 103.24 44.36 C128.24 51.22 148.64 52 168.32 46.64"/>
             </path>
-            <path id="banner-tail-shape" d="M157 15.9 Q181 11.7 207 14.9 L194 36.7 L208 53.8 Q188 51.8 158 64 Z">
+            <path id="banner-tail-shape" d="M157 15.94 Q181 11.71 207 14.91 L194 36.72 L208 53.81 Q188 51.81 158 64.05 Z">
               <animate data-breeze attributeName="d" begin="indefinite" dur="2.8s" repeatCount="indefinite"
-                values="M157 15.9 Q181 11.7 207 14.9 L194 36.7 L208 53.8 Q188 51.8 158 64 Z;
-                  M157 12.7 Q181 10.1 207 16.6 L194 36.6 L208 55.6 Q188 51 158 60.9 Z;
-                  M157 9.1 Q181 6.1 207 14.4 L194 33.2 L208 53.5 Q188 47.2 158 57.2 Z;
-                  M157 7.1 Q181 2 207 9.6 L194 28.5 L208 48.8 Q188 42.8 158 55.1 Z;
-                  M157 8.1 Q181 0.3 207 5.1 L194 25.3 L208 44.2 Q188 40.2 158 56 Z;
-                  M157 11.3 Q181 1.9 207 3.4 L194 25.4 L208 42.4 Q188 41 158 59.1 Z;
-                  M157 14.9 Q181 5.9 207 5.6 L194 28.8 L208 44.5 Q188 44.8 158 62.8 Z;
-                  M157 16.9 Q181 10 207 10.4 L194 33.5 L208 49.2 Q188 49.2 158 64.9 Z;
-                  M157 15.9 Q181 11.7 207 14.9 L194 36.7 L208 53.8 Q188 51.8 158 64 Z"/>
+                values="M157 15.94 Q181 11.71 207 14.91 L194 36.72 L208 53.81 Q188 51.81 158 64.05 Z;
+                  M157 15.3 Q181 11.62 207 15.67 L194 37.04 L208 54.6 Q188 51.94 158 63.42 Z;
+                  M157 14.52 Q181 11.31 207 16.2 L194 37.14 L208 55.17 Q188 51.84 158 62.65 Z;
+                  M157 13.65 Q181 10.8 207 16.5 L194 36.99 L208 55.51 Q188 51.51 158 61.79 Z;
+                  M157 12.71 Q181 10.1 207 16.56 L194 36.62 L208 55.6 Q188 50.97 158 60.85 Z;
+                  M157 11.75 Q181 9.25 207 16.35 L194 36.03 L208 55.43 Q188 50.25 158 59.88 Z;
+                  M157 10.8 Q181 8.27 207 15.91 L194 35.25 L208 55.02 Q188 49.35 158 58.92 Z;
+                  M157 9.89 Q181 7.2 207 15.24 L194 34.3 L208 54.37 Q188 48.33 158 58 Z;
+                  M157 9.06 Q181 6.09 207 14.36 L194 33.23 L208 53.52 Q188 47.22 158 57.15 Z;
+                  M157 8.35 Q181 4.98 207 13.32 L194 32.07 L208 52.49 Q188 46.07 158 56.42 Z;
+                  M157 7.78 Q181 3.9 207 12.15 L194 30.87 L208 51.33 Q188 44.91 158 55.82 Z;
+                  M157 7.37 Q181 2.9 207 10.9 L194 29.67 L208 50.08 Q188 43.79 158 55.38 Z;
+                  M157 7.13 Q181 2.03 207 9.61 L194 28.53 L208 48.79 Q188 42.75 158 55.12 Z;
+                  M157 7.09 Q181 1.3 207 8.34 L194 27.48 L208 47.51 Q188 41.85 158 55.05 Z;
+                  M157 7.23 Q181 0.76 207 7.14 L194 26.57 L208 46.28 Q188 41.1 158 55.17 Z;
+                  M157 7.56 Q181 0.42 207 6.04 L194 25.82 L208 45.16 Q188 40.54 158 55.47 Z;
+                  M157 8.06 Q181 0.29 207 5.09 L194 25.28 L208 44.19 Q188 40.19 158 55.95 Z;
+                  M157 8.7 Q181 0.38 207 4.33 L194 24.96 L208 43.4 Q188 40.06 158 56.58 Z;
+                  M157 9.48 Q181 0.69 207 3.8 L194 24.86 L208 42.83 Q188 40.16 158 57.35 Z;
+                  M157 10.35 Q181 1.2 207 3.5 L194 25.01 L208 42.49 Q188 40.49 158 58.21 Z;
+                  M157 11.29 Q181 1.9 207 3.44 L194 25.38 L208 42.4 Q188 41.03 158 59.15 Z;
+                  M157 12.25 Q181 2.75 207 3.65 L194 25.97 L208 42.57 Q188 41.75 158 60.12 Z;
+                  M157 13.2 Q181 3.73 207 4.09 L194 26.75 L208 42.98 Q188 42.65 158 61.08 Z;
+                  M157 14.11 Q181 4.8 207 4.76 L194 27.7 L208 43.63 Q188 43.67 158 62 Z;
+                  M157 14.94 Q181 5.91 207 5.64 L194 28.77 L208 44.48 Q188 44.78 158 62.85 Z;
+                  M157 15.65 Q181 7.02 207 6.68 L194 29.93 L208 45.51 Q188 45.93 158 63.58 Z;
+                  M157 16.22 Q181 8.1 207 7.85 L194 31.13 L208 46.67 Q188 47.09 158 64.18 Z;
+                  M157 16.63 Q181 9.1 207 9.1 L194 32.33 L208 47.92 Q188 48.21 158 64.62 Z;
+                  M157 16.87 Q181 9.97 207 10.39 L194 33.47 L208 49.21 Q188 49.25 158 64.88 Z;
+                  M157 16.91 Q181 10.7 207 11.66 L194 34.52 L208 50.49 Q188 50.15 158 64.95 Z;
+                  M157 16.77 Q181 11.24 207 12.86 L194 35.43 L208 51.72 Q188 50.9 158 64.83 Z;
+                  M157 16.44 Q181 11.58 207 13.96 L194 36.18 L208 52.84 Q188 51.46 158 64.53 Z;
+                  M157 15.94 Q181 11.71 207 14.91 L194 36.72 L208 53.81 Q188 51.81 158 64.05 Z"/>
             </path>
           </defs>
           <g class="banner-facing" stroke-linejoin="round" stroke-linecap="round">
@@ -253,7 +354,7 @@
           <circle r="7.1" fill="#ce3334" stroke="#ed5a4a" stroke-width="1"/>
           <circle cx="-1" cy="-1.4" r="2.1" fill="#f58062"/>
         </svg>
-        <span class="drumheller-water" data-landmark aria-hidden="true"></span>
+        <canvas class="drumheller-water" width="314" height="208" data-landmark aria-hidden="true"></canvas>
         <div class="harbor-wheel" data-street-art data-landmark aria-hidden="true">
           <noscript><img src="assets/wheel-poster.webp" width="450" height="475" decoding="async" alt=""></noscript>
           <canvas width="675" height="713" hidden></canvas>
@@ -415,9 +516,8 @@
     <section id="about" class="street-stop about-stop" data-location="Seattle Center" aria-labelledby="about-title">
       <div class="scene-reading stop-scroll">
         <div class="about-letter">
-          <h1 id="about-title" class="welcome-lettering" tabindex="-1">
-            <span class="greeting-line"><span class="greeting-words" data-write-title="greeting">Glad you’re here.</span>
-            </span>
+          <h1 id="about-title" class="tour-heading" tabindex="-1">
+            <span data-write-title="greeting">Glad you’re here.</span>
           </h1>
           <div class="intro-bio">
             <p class="bio-phrase byline"><span>Hi, I’m Dave.</span><img class="dave-portrait" src="assets/dave-avatar.webp" width="160" height="160" alt="Dave Guo"></p>
@@ -447,10 +547,7 @@
     <section id="work" class="street-stop market-stop" data-location="Pike Place Market" aria-labelledby="work-heading">
   <div class="market-reading stop-scroll">
     <div class="market-content">
-      <header class="market-copy">
-        <h2 id="work-heading" data-write-title>Project bakery</h2>
-        <p>Pick a loaf to see what I made.</p>
-      </header>
+      <h2 id="work-heading" class="tour-heading"><span data-write-title>Project bakery</span></h2>
       <div class="market-loaves" role="group" aria-labelledby="work-heading">
         <a class="market-loaf" data-project="habitail" href="https://habitail.pet/" aria-label="Visit the HabiTail store">
           <span class="market-tray"><img src="assets/bread-sourdough.webp" alt="" width="490" height="490" loading="lazy" decoding="async"></span>
@@ -471,9 +568,9 @@
 
     <section id="experience" class="street-stop pier-stop" data-location="UW campus" aria-labelledby="experience-heading">
       <div class="scene-reading stop-scroll"><div class="pier-notes">
-        <h2 class="street-title" id="experience-heading" data-write-title>Experience &amp; education</h2>
+        <h2 id="experience-heading" class="tour-heading"><span data-write-title>Education</span></h2>
         <dl class="notebook">
-          <div><dt>Ishoni Yakiniku</dt><dd>Server · Seattle · Since September 2024</dd><dd>I take orders, show guests how the tabletop grills work, and help keep service moving.</dd></div>
+          <div><dt class="education-school"><img src="assets/south-seattle-mark.png" width="128" height="128" alt=""><span>South Seattle College</span></dt><dd>July 2024</dd><dd>A.S. in Computer Science</dd></div>
           <div><dt class="education-school"><img src="assets/uw-block-w.png" width="368" height="247" alt=""><span>University of Washington</span></dt><dd>Allen School · June 2026</dd><dd>B.S. in Computer Science</dd></div>
         </dl>
         <a class="resume-note" href="assets/dave-guo-resume.pdf?v=dcabc63e05" target="_blank" rel="noopener">View my résumé</a>
@@ -481,7 +578,7 @@
     </section>
     <section id="contact" class="street-stop bay-stop" data-location="Pier 57 · Elliott Bay" aria-labelledby="contact-heading">
       <div class="scene-reading stop-scroll"><div class="harbor-contact">
-        <h2 class="street-title" id="contact-heading" data-write-title>Say hi.</h2>
+        <h2 id="contact-heading" class="tour-heading"><span data-write-title>Say hi.</span></h2>
         <div class="contact-links"><a class="contact-display email-display" href="mailto:adz9596@gmail.com" aria-label="Email Dave at adz9596@gmail.com" data-hint="adz9596@gmail.com"><span class="contact-logo gmail-logo" aria-hidden="true"><img src="assets/gmail-logo.png" alt=""></span></a><a class="contact-display linkedin-display" href="https://www.linkedin.com/in/dave-guo-957677194/" target="_blank" rel="noopener noreferrer" aria-label="Dave Guo on LinkedIn" data-hint="LinkedIn"><span class="contact-logo linkedin-logo" aria-hidden="true"><img src="assets/linkedin-in.svg" alt=""></span></a></div>
       </div></div>
     </section>

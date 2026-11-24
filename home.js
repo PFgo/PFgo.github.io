@@ -56,8 +56,26 @@ const projects = {
 };
 const projectDialog = $('#project-dialog');
 let lastTrigger = null;
+let lastPreview = null;
 
-function openProject(project, trigger) {
+function prepareProjectPreview(spec) {
+  if (!spec) return null;
+  if (lastPreview?.getAttribute('src') === spec.src && (!lastPreview.complete || lastPreview.naturalWidth)) {
+    return lastPreview;
+  }
+  const image = new Image(spec.width, spec.height);
+  image.alt = spec.alt;
+  image.className = 'dialog-image';
+  if (spec.className) image.classList.add(spec.className);
+  image.decoding = 'async';
+  image.src = spec.src;
+  // Warm the selected project on intent. The dialog can open while its image loads.
+  image.decode?.().catch(() => {});
+  lastPreview = image;
+  return image;
+}
+
+function openProject(project, trigger, preview) {
   const category = $('#dialog-category');
   category.textContent = project.category || '';
   category.hidden = !project.category;
@@ -68,16 +86,7 @@ function openProject(project, trigger) {
   intro.className = 'dialog-intro';
   intro.textContent = project.intro;
   content.replaceChildren(intro);
-  if (project.image) {
-    const image = document.createElement('img');
-    image.width = project.image.width;
-    image.height = project.image.height;
-    image.alt = project.image.alt;
-    image.src = project.image.src;
-    image.className = 'dialog-image';
-    if (project.image.className) image.classList.add(project.image.className);
-    content.append(image);
-  }
+  if (preview) content.append(preview);
   if (project.points?.length) {
     const list = document.createElement('ul');
     list.className = 'dialog-list';
@@ -121,13 +130,16 @@ if (typeof projectDialog.showModal === 'function') {
     const id = Object.hasOwn(previousIds, key) ? previousIds[key] : key;
     if (!Object.hasOwn(projects, id)) continue;
     const project = projects[id];
+    const preparePreview = () => prepareProjectPreview(project.image);
     trigger.setAttribute('aria-label', 'Open ' + project.name + ' project details');
     trigger.setAttribute('aria-haspopup', 'dialog');
     trigger.setAttribute('aria-controls', projectDialog.id);
+    trigger.addEventListener('pointerenter', preparePreview);
+    trigger.addEventListener('focus', preparePreview);
     trigger.addEventListener('click', event => {
       if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      openProject(project, trigger);
+      openProject(project, trigger, preparePreview());
     });
   }
 }
@@ -150,10 +162,67 @@ const streetStage = $('.seattle-stage');
 const streetToggle = $('#street-motion');
 const trees = Array.from(streetStage.querySelectorAll('.street-tree'));
 const fountain = streetStage.querySelector('.drumheller-water');
+const projectsStop = $('#work');
 const needleBanner = streetStage.querySelector('.needle-banner');
 let pausedByVisitor = false;
 let streetOnscreen = true;
 let breezeStarted = false;
+let fountainRequested = false;
+let fountainAtlas;
+let fountainContext;
+let fountainFrame = 0;
+let fountainTimer;
+
+async function prepareFountain() {
+  fountainRequested = true;
+  const url = 'assets/fountain-water-atlas.webp';
+  try {
+    fountainContext = fountain.getContext('2d');
+    if (!fountainContext) return;
+    if (typeof createImageBitmap === 'function') {
+      const response = await fetch(url);
+      if (!response.ok) return;
+      fountainAtlas = await createImageBitmap(await response.blob());
+    } else {
+      const image = new Image();
+      image.src = url;
+      await image.decode();
+      fountainAtlas = image;
+    }
+    syncFountain();
+  } catch {
+    // The street painting includes the still fountain if its moving water is unavailable.
+  }
+}
+
+function paintFountainFrame() {
+  const {width, height} = fountain;
+  const x = (fountainFrame % 8) * width;
+  const y = Math.floor(fountainFrame / 8) * height;
+  fountainContext.clearRect(0, 0, width, height);
+  fountainContext.drawImage(fountainAtlas, x, y, width, height, 0, 0, width, height);
+  fountainFrame = (fountainFrame + 1) % 48;
+}
+
+function syncFountain() {
+  const active = !streetStage.hasAttribute('data-street-paused') &&
+    !document.documentElement.hasAttribute('data-street-opening');
+  const inView = !fountain.hasAttribute('data-out-of-view');
+  if (active && !fountainRequested && (inView || projectsStop.hasAttribute('data-current-stop'))) {
+    prepareFountain();
+  }
+  if (active && inView && fountainAtlas) {
+    if (fountainTimer === undefined) {
+      paintFountainFrame();
+      fountain.setAttribute('data-water-ready', '');
+      fountainTimer = setInterval(paintFountainFrame, 50);
+    }
+  } else {
+    clearInterval(fountainTimer);
+    fountainTimer = undefined;
+  }
+}
+new MutationObserver(syncFountain).observe(projectsStop, {attributes:true, attributeFilter:['data-current-stop']});
 
 function syncBanner() {
   if (typeof needleBanner?.pauseAnimations !== 'function') return;
@@ -182,7 +251,7 @@ function syncTree(tree) {
 function syncStreet() {
   const paused = pausedByVisitor || !streetOnscreen || document.hidden || projectDialog.open || reducedMotion.matches;
   streetStage.toggleAttribute('data-street-paused', paused);
-  if (!paused && !fountain.hasAttribute('data-out-of-view')) fountain.setAttribute('data-water-ready', '');
+  syncFountain();
   trees.forEach(syncTree);
   syncBanner();
   streetToggle.hidden = reducedMotion.matches;
@@ -205,16 +274,14 @@ if ('IntersectionObserver' in window) {
       target.toggleAttribute('data-out-of-view', !isIntersecting);
       if (target.matches('.street-tree')) syncTree(target);
       if (target === needleBanner) syncBanner();
-      if (target === fountain && isIntersecting && !streetStage.hasAttribute('data-street-paused')) {
-        fountain.setAttribute('data-water-ready', '');
-      }
+      if (target === fountain) syncFountain();
     }
   }, {root: $('#street-rail'), rootMargin: '24px'});
   // Pause an offscreen walker's limbs, but let their lane keep travelling
   // so they can naturally re-enter the scene at the right moment.
   const landmarks = streetStage.querySelectorAll('[data-landmark], .campus-conversation, .harbor-air, .street-lane svg');
   landmarks.forEach(landmark => landmark.setAttribute('data-out-of-view', ''));
-  // Wait until the navigation script has replaced the static overview with the rail.
+  // The flag can start as soon as the rail exists, even if other scripts are still loading.
   function observeStreet() {
     if (!document.documentElement.hasAttribute('data-street-navigation-ready')) return;
     if (document.documentElement.hasAttribute('data-street-opening')) {
@@ -227,7 +294,7 @@ if ('IntersectionObserver' in window) {
     streetObserver.observe(streetStage);
     landmarks.forEach(landmark => landmarkObserver.observe(landmark));
   }
-  if (document.readyState === 'complete') observeStreet();
+  if (document.documentElement.hasAttribute('data-street-navigation-ready')) observeStreet();
   else document.addEventListener('DOMContentLoaded', observeStreet, {once:true});
 }
 new MutationObserver(syncStreet).observe(projectDialog, {attributes:true, attributeFilter:['open']});
