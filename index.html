@@ -24,9 +24,10 @@
         matchMedia('(prefers-reduced-motion: no-preference)').matches &&
         performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
       const root = document.documentElement;
-      root.setAttribute('data-opening-pending', '');
+      const firstFrameBudget = 4000;
+      root.dataset.openingPending = String(performance.now() + firstFrameBudget);
       const showPage = () => root.removeAttribute('data-opening-pending');
-      const timeout = setTimeout(showPage, 1500);
+      const timeout = setTimeout(showPage, firstFrameBudget);
       document.addEventListener('DOMContentLoaded', () => { clearTimeout(timeout); showPage(); }, {once:true});
       window.addEventListener('pagehide', showPage, {once:true});
     }
@@ -41,7 +42,7 @@
   <link rel="stylesheet" href="landmarks.css?v=3484fa590b">
   <link rel="stylesheet" href="heading-ink.css?v=046c2a5dd3">
   <noscript><style>.street-tree { background: url("assets/tree-cherry.webp") center / 100% 100% no-repeat; }</style></noscript>
-  <script defer src="street-navigation.js?v=34d3a4494a"></script>
+  <script defer src="street-navigation.js?v=c1587ed931"></script>
   <script defer src="street-art.js?v=1707b85147"></script>
   <script defer src="home.js?v=861ed036b7"></script>
   <script defer src="harbor-wheel.js?v=0d942bb506"></script>

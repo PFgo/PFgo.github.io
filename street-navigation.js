@@ -596,7 +596,7 @@
     });
   }
 
-  function playOpening(panoramaReady) {
+  function playOpening(panoramaReady, firstFrameDeadline) {
     const root = document.documentElement;
     const banner = stage.querySelector('.needle-banner');
     const view = rail.getBoundingClientRect();
@@ -641,8 +641,8 @@
       document.dispatchEvent(new Event('street-opening-end'));
     }
     root.dataset.streetOpening = 'loading';
-    // A failed or stalled backdrop should never keep the navigation hidden.
-    let deadline = setTimeout(finish, 1500);
+    // Share the first-frame budget with the document bootstrap, including on a cold load.
+    let deadline = setTimeout(finish, Math.max(0, firstFrameDeadline - performance.now()));
     stops[0].addEventListener('animationstart', event => {
       if (event.animationName === 'opening-greeting') releaseGreeting();
     }, {signal});
@@ -679,11 +679,12 @@
   measure();
   alignHeadings();
   const initial = routeIndex(location.hash);
-  openingHoldsGreeting = initial === 0 && document.documentElement.hasAttribute('data-opening-pending') &&
+  const firstFrameDeadline = Number(document.documentElement.dataset.openingPending);
+  openingHoldsGreeting = initial === 0 && firstFrameDeadline > performance.now() &&
       !reducedMotion.matches && !document.hidden;
   const firstPaint = loadPanorama();
   navigate(initial < 0 ? 0 : initial, {instant:true});
-  if (openingHoldsGreeting) playOpening(firstPaint);
+  if (openingHoldsGreeting) playOpening(firstPaint, firstFrameDeadline);
   document.documentElement.removeAttribute('data-opening-pending');
   if (document.readyState === 'complete') scheduleStreetWarmup();
   if ('ResizeObserver' in window) {
