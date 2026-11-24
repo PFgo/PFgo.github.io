@@ -315,7 +315,17 @@
     }
     watch.observe(stop, {attributes:true, attributeFilter:['data-ink-arrived']});
     start();
-    if (heading.dataset.writeTitle === 'greeting' && document.documentElement.hasAttribute('data-street-opening') && window.requestIdleCallback) {
+    function primePictures() {
+      if (stop.dataset.inkArrived) return;
+      preparePictures();
+      try {
+        pictures?.forEach(picture => picture.draw(picture.start));
+      } catch {
+        restoreText();
+      }
+    }
+    if (heading.dataset.writeTitle !== 'greeting') return primePictures;
+    if (document.documentElement.hasAttribute('data-street-opening') && window.requestIdleCallback) {
       requestIdleCallback(function warmGreeting(idle) {
         if (stop.dataset.inkArrived || document.hidden) return;
         const stage = document.querySelector('.city-stage');
@@ -327,17 +337,38 @@
         }
         // Use spare time in the stationary close-up to prepare the pen and its
         // first glyph masks. At the word start the reveal mask is still empty.
-        preparePictures();
-        try {
-          pictures?.forEach(picture => picture.draw(picture.start));
-        } catch {
-          restoreText();
-        }
+        primePictures();
       });
     }
   }
 
   if (!document.fonts || !document.documentElement.hasAttribute('data-street-navigation-ready')) return;
+  function warmSectionTitles(queue) {
+    if (!queue.length || !window.requestIdleCallback) return;
+    const about = document.getElementById('about');
+    const rail = document.getElementById('street-rail');
+    if (!about || !rail) return;
+    // Each prepared word retains its canvas and three scratch surfaces.
+    // Limit narrow, often high-DPR screens to the next stop.
+    if (matchMedia('(max-width: 700px)').matches) queue.length = 1;
+    function warmOne(idle) {
+      // An early departure just uses normal on-arrival preparation. Never
+      // interrupt the camera, a manual pan, or a newly selected route.
+      if (document.hidden || !motion.matches || !document.documentElement.hasAttribute('data-street-warm') ||
+          !about.hasAttribute('data-current-stop') || Math.abs(rail.scrollLeft) > 1 ||
+          rail.hasAttribute('data-route-gliding') || idle.timeRemaining() < 6) return;
+      queue.shift()();
+      if (queue.length) requestIdleCallback(warmOne);
+    }
+    const watch = new MutationObserver(afterGreeting);
+    function afterGreeting() {
+      if (about.dataset.inkArrived !== 'complete') return;
+      watch.disconnect();
+      requestIdleCallback(warmOne);
+    }
+    watch.observe(about, {attributes:true, attributeFilter:['data-ink-arrived']});
+    afterGreeting();
+  }
   async function loadPen(selector, font, url, plan, tileLeft) {
     const titles = document.querySelectorAll(selector);
     if (!titles.length) return;
@@ -349,20 +380,38 @@
     measure.font = font;
     const metrics = measure.measureText('Hg');
     if (![metrics.fontBoundingBoxAscent, metrics.fontBoundingBoxDescent].every(Number.isFinite)) return;
+    const warm = [];
     for (const heading of titles) {
       const stop = heading.closest('.street-stop');
       // A late asset must never erase a title the visitor has already seen.
       if (!stop || (stop.dataset.inkArrived && !document.documentElement.hasAttribute('data-pen-pending'))) continue;
-      prepare(heading, measure, atlas);
+      const prime = prepare(heading, measure, atlas);
+      if (prime) warm.push(prime);
     }
+    warmSectionTitles(warm);
   }
-  async function loadRenderer() {
-    // Either typeface can fall back to native text independently.
-    await Promise.allSettled([
-      loadPen('[data-write-title="greeting"]', '400 100px "Seattle Greeting Ink"', 'assets/greeting-pen-order.bin?v=335f4d37fb', greetingPlan, -7),
-      loadPen('[data-write-title=""]', '375 100px "Seattle Section Ink"', 'assets/heading-pen-order.bin?v=9aa5029801', patrickPlan, -12)
-    ]);
-    document.documentElement.removeAttribute('data-pen-pending');
+  function loadRenderer() {
+    const root = document.documentElement;
+    const rail = document.getElementById('street-rail');
+    const onAbout = document.getElementById('about').hasAttribute('data-current-stop');
+    const greeting = loadPen('[data-write-title="greeting"]', '400 100px "Seattle Greeting Ink"', 'assets/greeting-pen-order.bin?v=335f4d37fb', greetingPlan, -7);
+    const sections = new Promise(resolve => {
+      const listeners = new AbortController();
+      function start() {
+        listeners.abort();
+        resolve(loadPen('[data-write-title=""]', '375 100px "Seattle Section Ink"', 'assets/heading-pen-order.bin?v=9aa5029801', patrickPlan, -12));
+      }
+      if (!onAbout || root.hasAttribute('data-street-warm')) return start();
+      // On the homepage the panorama gets the network first. A visitor who
+      // leaves early can request the next pen as soon as the street moves.
+      document.addEventListener('street-art-warm', start, {signal:listeners.signal});
+      rail.addEventListener('scroll', () => {
+        if (rail.scrollLeft > 1 && motion.matches) start();
+      }, {passive:true, signal:listeners.signal});
+    });
+    const showTitle = () => root.removeAttribute('data-pen-pending');
+    (onAbout ? greeting : sections).then(showTitle, showTitle);
+    return Promise.allSettled([greeting, sections]);
   }
   const motion = matchMedia('(prefers-reduced-motion: no-preference)');
   if (motion.matches) loadRenderer();

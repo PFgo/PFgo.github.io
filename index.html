@@ -19,11 +19,6 @@
         performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
       const root = document.documentElement;
       root.setAttribute('data-opening-pending', '');
-      const backdrop = document.createElement('link');
-      backdrop.rel = 'preload';
-      backdrop.as = 'image';
-      backdrop.href = 'assets/street-overview.webp';
-      document.head.append(backdrop);
       const showPage = () => root.removeAttribute('data-opening-pending');
       const timeout = setTimeout(showPage, 1500);
       document.addEventListener('DOMContentLoaded', () => { clearTimeout(timeout); showPage(); }, {once:true});
@@ -33,19 +28,18 @@
   <link rel="preload" href="assets/seattle-greeting-ink.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/greeting-pen-order.bin?v=335f4d37fb" as="fetch" crossorigin media="(prefers-reduced-motion: no-preference)">
   <link rel="preload" href="assets/patrick-hand.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="assets/heading-pen-order.bin?v=9aa5029801" as="fetch" crossorigin media="(prefers-reduced-motion: no-preference)">
   <link rel="preload" href="assets/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="home.css?v=7d5d79535d">
-  <link rel="stylesheet" href="tour.css?v=0e2ec23499">
+  <link rel="stylesheet" href="tour.css?v=e3c6aa0bda">
   <link rel="stylesheet" href="market-stop.css?v=20efc66c5b">
   <link rel="stylesheet" href="landmarks.css?v=3484fa590b">
   <link rel="stylesheet" href="heading-ink.css?v=046c2a5dd3">
   <noscript><style>.street-tree { background: url("assets/tree-cherry.webp") center / 100% 100% no-repeat; }</style></noscript>
-  <script defer src="street-navigation.js?v=1256f3bf03"></script>
-  <script defer src="street-art.js?v=4f59586f19"></script>
-  <script defer src="home.js?v=60c14f6999"></script>
-  <script defer src="harbor-wheel.js?v=97716d2bb2"></script>
-  <script defer src="heading-ink.js?v=27db7df1b8"></script>
+  <script defer src="street-navigation.js?v=ac94be5d07"></script>
+  <script defer src="street-art.js?v=1707b85147"></script>
+  <script defer src="home.js?v=861ed036b7"></script>
+  <script defer src="harbor-wheel.js?v=0d942bb506"></script>
+  <script defer src="heading-ink.js?v=4e3af8163b"></script>
 </head>
 <body class="street-page">
 <a class="skip" href="#about-title">Skip to introduction</a>
@@ -191,8 +185,7 @@
   <main id="street-rail" tabindex="-1" aria-label="Dave’s Seattle street">
     <div class="street-world">
       <div class="seattle-stage city-stage" role="img" aria-label="An illustrated Seattle street. A flag on the Space Needle reads “Open to work”. Walk past Pike Place Market, Suzzallo Library and Drumheller Fountain to the Great Wheel and ferry on Elliott Bay.">
-        <img class="opening-preview" src="assets/street-overview.webp" width="1280" height="110" alt="" decoding="async" onload="this.setAttribute('data-painted', '')">
-        <img class="city-painted-world" onload="this.setAttribute('data-painted', '')" onerror="this.removeAttribute('data-painted')" src="assets/seattle-promenade.webp?v=landmark-motion01" srcset="assets/seattle-promenade-small.webp?v=landmark-motion01 4200w, assets/seattle-promenade-medium.webp?v=landmark-motion01 5040w, assets/seattle-promenade.webp?v=landmark-motion01 8400w" sizes="(scripting: none) 100vw, (max-width: 700px) and (orientation: portrait) min(400.71vw, 346.56dvh), (max-width: 700px) and (max-height: 430px) max(277.97vw, min(465.69vw, 346.56dvh)), (max-width: 700px) min(465.69vw, 346.56dvh), max(259.92vw, min(346.56vw, 519.84dvh))" alt="" width="8400" height="724" decoding="async" fetchpriority="high">
+        <img class="city-painted-world" src="assets/seattle-promenade.webp?v=landmark-motion01" srcset="assets/seattle-promenade-small.webp?v=landmark-motion01 4200w, assets/seattle-promenade-medium.webp?v=landmark-motion01 5040w, assets/seattle-promenade.webp?v=landmark-motion01 8400w" sizes="(scripting: none) 100vw, (max-width: 700px) and (orientation: portrait) min(400.71vw, 346.56dvh), (max-width: 700px) and (max-height: 430px) max(277.97vw, min(465.69vw, 346.56dvh)), (max-width: 700px) min(465.69vw, 346.56dvh), max(259.92vw, min(346.56vw, 519.84dvh))" alt="" width="8400" height="724" decoding="async" fetchpriority="high">
         <span class="street-window-lights" aria-hidden="true"></span>
         <span class="market-neon" aria-hidden="true"></span>
         <svg class="needle-banner" data-landmark aria-hidden="true" focusable="false" viewBox="0 0 210 74">

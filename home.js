@@ -134,7 +134,10 @@ if (typeof projectDialog.showModal === 'function') {
     trigger.setAttribute('aria-label', 'Open ' + project.name + ' project details');
     trigger.setAttribute('aria-haspopup', 'dialog');
     trigger.setAttribute('aria-controls', projectDialog.id);
-    trigger.addEventListener('pointerenter', preparePreview);
+    trigger.addEventListener('pointerenter', () => {
+      // Moving the street under a stationary pointer can synthesize an enter.
+      if (!streetRail.hasAttribute('data-route-gliding')) preparePreview();
+    });
     trigger.addEventListener('focus', preparePreview);
     trigger.addEventListener('click', event => {
       if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -158,41 +161,88 @@ projectDialog.addEventListener('click', event => {
 
 // The street has one pause control. Local landmarks also sleep outside the viewport.
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+const streetRail = $('#street-rail');
 const streetStage = $('.seattle-stage');
 const streetToggle = $('#street-motion');
 const trees = Array.from(streetStage.querySelectorAll('.street-tree'));
 const fountain = streetStage.querySelector('.drumheller-water');
+const aboutStop = $('#about');
 const projectsStop = $('#work');
 const needleBanner = streetStage.querySelector('.needle-banner');
 let pausedByVisitor = false;
 let streetOnscreen = true;
 let breezeStarted = false;
 let fountainRequested = false;
+let useFountainImage = typeof Worker !== 'function';
+let fountainBlob;
 let fountainAtlas;
 let fountainContext;
 let fountainFrame = 0;
 let fountainTimer;
 
-async function prepareFountain() {
+async function fetchFountain(priority) {
   fountainRequested = true;
-  const url = 'assets/fountain-water-atlas.webp';
   try {
-    fountainContext = fountain.getContext('2d');
-    if (!fountainContext) return;
-    if (typeof createImageBitmap === 'function') {
-      const response = await fetch(url);
-      if (!response.ok) return;
-      fountainAtlas = await createImageBitmap(await response.blob());
-    } else {
-      const image = new Image();
-      image.src = url;
-      await image.decode();
-      fountainAtlas = image;
-    }
+    // Measure the untransformed canvas once. The opening camera magnifies its parent.
+    const ratio = window.devicePixelRatio || 1;
+    const compact = matchMedia('(max-width: 700px)').matches &&
+      fountain.clientWidth * ratio <= 224 && fountain.clientHeight * ratio <= 148;
+    const atlas = compact ? 'fountain-water-atlas-small.webp' : 'fountain-water-atlas.webp';
+    const response = await fetch('assets/' + atlas, {priority});
+    if (!response.ok) return;
+    fountainBlob = await response.blob();
+    // Conditions can change while the bytes are in flight.
     syncFountain();
   } catch {
-    // The street painting includes the still fountain if its moving water is unavailable.
+    // The street painting already includes a still fountain.
   }
+}
+
+async function decodeFountainOffscreen(blob) {
+  const worker = new Worker('fountain-worker.js?v=d176d7bc24');
+  try {
+    return await new Promise((resolve, reject) => {
+      worker.onmessage = ({data}) => data ? resolve(data) : reject();
+      worker.onerror = worker.onmessageerror = reject;
+      worker.postMessage(blob);
+    });
+  } finally {
+    worker.terminate();
+  }
+}
+
+async function decodeFountain() {
+  const blob = fountainBlob;
+  fountainBlob = null;
+  fountainContext ??= fountain.getContext('2d');
+  if (!fountainContext) return;
+  if (!useFountainImage) {
+    try {
+      fountainAtlas = await decodeFountainOffscreen(blob);
+    } catch {
+      // Keep the bytes until a quiet moment if workers or bitmap transfers are blocked.
+      useFountainImage = true;
+      fountainBlob = blob;
+    }
+  } else {
+    let src;
+    try {
+      const image = new Image();
+      src = URL.createObjectURL(blob);
+      image.src = src;
+      await image.decode();
+      fountainAtlas = image;
+    } catch {
+      // The street painting includes a still fountain.
+    } finally {
+      if (src) URL.revokeObjectURL(src);
+    }
+  }
+  if (fountainAtlas) {
+    fountain.width = fountainAtlas.width / 8;
+    fountain.height = fountainAtlas.height / 6;
+  }
+  syncFountain();
 }
 
 function paintFountainFrame() {
@@ -204,14 +254,32 @@ function paintFountainFrame() {
   fountainFrame = (fountainFrame + 1) % 48;
 }
 
+function hasFlagHoldTime() {
+  const camera = streetStage.getAnimations?.().find(animation => animation.animationName === 'needle-pullback');
+  return Number.isFinite(camera?.currentTime) && camera.effect.getTiming().delay - camera.currentTime > 300;
+}
+
 function syncFountain() {
-  const active = !streetStage.hasAttribute('data-street-paused') &&
-    !document.documentElement.hasAttribute('data-street-opening');
+  const paused = streetStage.hasAttribute('data-street-paused');
+  const opening = document.documentElement.hasAttribute('data-street-opening');
+  const gliding = streetRail.hasAttribute('data-route-gliding');
   const inView = !fountain.hasAttribute('data-out-of-view');
-  if (active && !fountainRequested && (inView || projectsStop.hasAttribute('data-current-stop'))) {
-    prepareFountain();
+  const warm = document.documentElement.hasAttribute('data-street-warm');
+  const warmAbout = warm && aboutStop.hasAttribute('data-current-stop');
+  const nearFountain = inView || (warm && projectsStop.hasAttribute('data-current-stop'));
+  if (!paused && !gliding && (warmAbout || (!opening && nearFountain))) {
+    if (!fountainRequested) fetchFountain(warmAbout && !inView ? 'low' : 'auto');
+    else if (fountainBlob) {
+      // Spend spare time in the stationary flag close-up. A slow download can
+      // wait through the pullback and greeting without taking a frame from either.
+      const quiet = useFountainImage
+        ? !opening && streetRail.querySelector('[data-current-stop][data-ink-arrived="complete"]')
+        : opening ? warmAbout && document.documentElement.dataset.streetOpening === 'flag' && hasFlagHoldTime()
+          : nearFountain || aboutStop.dataset.inkArrived === 'complete';
+      if (quiet) decodeFountain();
+    }
   }
-  if (active && inView && fountainAtlas) {
+  if (!paused && !opening && !gliding && inView && fountainAtlas) {
     if (fountainTimer === undefined) {
       paintFountainFrame();
       fountain.setAttribute('data-water-ready', '');
@@ -222,7 +290,12 @@ function syncFountain() {
     fountainTimer = undefined;
   }
 }
-new MutationObserver(syncFountain).observe(projectsStop, {attributes:true, attributeFilter:['data-current-stop']});
+const fountainRouteObserver = new MutationObserver(syncFountain);
+fountainRouteObserver.observe(streetRail, {attributes:true, attributeFilter:['data-route-gliding']});
+fountainRouteObserver.observe(document.documentElement, {attributes:true, attributeFilter:['data-street-warm', 'data-street-opening']});
+for (const stop of streetRail.querySelectorAll('.street-stop')) {
+  fountainRouteObserver.observe(stop, {attributes:true, attributeFilter:['data-current-stop', 'data-ink-arrived']});
+}
 
 function syncBanner() {
   if (typeof needleBanner?.pauseAnimations !== 'function') return;
@@ -276,7 +349,7 @@ if ('IntersectionObserver' in window) {
       if (target === needleBanner) syncBanner();
       if (target === fountain) syncFountain();
     }
-  }, {root: $('#street-rail'), rootMargin: '24px'});
+  }, {root: streetRail, rootMargin: '24px'});
   // Pause an offscreen walker's limbs, but let their lane keep travelling
   // so they can naturally re-enter the scene at the right moment.
   const landmarks = streetStage.querySelectorAll('[data-landmark], .campus-conversation, .harbor-air, .street-lane svg');

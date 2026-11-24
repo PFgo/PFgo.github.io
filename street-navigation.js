@@ -55,6 +55,19 @@
       stop.getBoundingClientRect().left - leftEdge + rail.scrollLeft)));
   }
 
+  function positionAt(x, stopsAt) {
+    const right = stopsAt.findIndex(left => left > x);
+    if (right < 0) return stopsAt.length - 1;
+    if (right === 0) return 0;
+    return right - 1 + (x - stopsAt[right - 1]) / (stopsAt[right] - stopsAt[right - 1]);
+  }
+
+  function offsetAt(position) {
+    const index = Math.floor(position);
+    const next = offsets[index + 1] ?? offsets[index];
+    return offsets[index] + (next - offsets[index]) * (position - index);
+  }
+
   // Follow the hero when its biography wraps, its fonts load, or the phone rotates.
   // Only the other stops consume these values; scrolling never needs to measure text.
   function alignHeadings() {
@@ -80,6 +93,7 @@
   }
 
   document.addEventListener('visibilitychange', () => {
+    if (document.hidden && routeFrame) navigate(destination, {instant:true});
     for (const stop of stops) {
       if (stop.dataset.inkArrived === 'playing') watchPen(stop);
     }
@@ -110,15 +124,9 @@
     if (rail.clientWidth !== width || rail.clientHeight !== height) resize();
     if (resizePosition !== null) restorePosition();
     const x = Math.min(maximum, Math.max(0, rail.scrollLeft));
-    const nearest = offsets.reduce((best, offset, i) =>
-      Math.abs(x - offset) < Math.abs(x - offsets[best]) ? i : best, 0);
-    const delta = x - offsets[nearest];
-    const adjacent = nearest + Math.sign(delta);
-    const span = Math.abs(offsets[adjacent] - offsets[nearest]);
-    if (resizePosition === null) {
-      routePosition = nearest;
-      if (Math.abs(delta) > 1.5 && span > 0) routePosition += delta / span;
-    }
+    const position = positionAt(x, offsets);
+    const nearest = Math.round(position);
+    if (resizePosition === null) routePosition = Math.abs(x - offsets[nearest]) <= 1.5 ? nearest : position;
     const progress = maximum ? (x / maximum).toFixed(5) : '0';
     if (sky && progress !== skyProgress) {
       sky.style.setProperty('--tour-progress', progress);
@@ -230,6 +238,7 @@
     cancelAnimationFrame(routeFrame);
     routeFrame = 0;
     destination = null;
+    rail.removeAttribute('data-route-gliding');
   }
 
   function navigate(index, {instant = false, push = false, focus = false, hash} = {}) {
@@ -244,6 +253,7 @@
       history.pushState(history.state, '', hash);
     }
     destination = index;
+    if (rail.clientWidth !== width || rail.clientHeight !== height) measure();
     const start = rail.scrollLeft;
     const distance = offsets[index] - start;
     if (focus) {
@@ -251,23 +261,44 @@
       heading.setAttribute('tabindex', '-1');
       heading.focus({preventScroll:true});
     }
-    if (instant || reducedMotion.matches || Math.abs(distance) <= 1) {
+    if (instant || document.hidden || reducedMotion.matches || Math.abs(distance) <= 1) {
       rail.scrollTo({left:offsets[index], behavior:'instant'});
       settle();
       return;
     }
     // Use the same camera timing in Safari and Chrome. Longer trips get
     // more time without making a visitor wait separately for each stop.
-    const duration = Math.min(900, 360 + 300 * Math.sqrt(Math.abs(distance) / width));
+    const initialOffsets = offsets;
+    const screens = Math.abs(distance) / width;
+    const duration = Math.max(360 + 300 * Math.sqrt(screens), 500 * screens);
     const started = performance.now();
+    let previous;
+    let frameInterval;
+    let elapsed = 0;
+    rail.setAttribute('data-route-gliding', '');
     function glide(now) {
-      const t = Math.max(0, Math.min(1, (now - started) / duration));
+      const wallTime = Math.max(0, now - started);
+      if (previous === undefined) {
+        elapsed = Math.min(64, wallTime);
+      } else {
+        // Average late frames with their neighbors at the display's own cadence.
+        // Repay at most 2ms per frame to keep the camera near its arrival time.
+        const interval = Math.min(64, now - previous);
+        frameInterval = frameInterval === undefined ? interval : frameInterval + .27 * (interval - frameInterval);
+        const behind = Math.max(0, previous - started - elapsed);
+        elapsed = Math.min(wallTime, elapsed + frameInterval + Math.min(2, .15 * behind));
+      }
+      previous = now;
+      const t = Math.min(1, elapsed / duration);
       const eased = t * t * (3 - 2 * t);
-      rail.scrollTo({left:start + distance * eased, behavior:'instant'});
+      // Preserve the same point between landmarks even across layout breakpoints.
+      const left = start + distance * eased;
+      rail.scrollTo({left:offsets === initialOffsets ? left : offsetAt(positionAt(left, initialOffsets)), behavior:'instant'});
       if (t < 1) routeFrame = requestAnimationFrame(glide);
       else {
         routeFrame = 0;
         settle();
+        rail.removeAttribute('data-route-gliding');
       }
     }
     routeFrame = requestAnimationFrame(glide);
@@ -402,9 +433,7 @@
   }
 
   function restorePosition() {
-    const index = Math.floor(resizePosition);
-    const next = offsets[index + 1] ?? offsets[index];
-    const left = offsets[index] + (next - offsets[index]) * (resizePosition - index);
+    const left = offsetAt(resizePosition);
     if (Math.abs(rail.scrollLeft - left) > 1) rail.scrollTo({left, behavior:'instant'});
   }
 
@@ -414,6 +443,10 @@
     // A mobile browser may change viewport height mid-gesture. Keep the same
     // point between landmarks throughout the resize, including scroll events
     // the browser generates while it clamps the old viewport's offset.
+    if (routeFrame) {
+      measure();
+      return;
+    }
     resizePosition ??= destination ?? routePosition;
     cancelRoute();
     cancelWheel();
@@ -432,10 +465,52 @@
   const stage = rail.querySelector('.city-stage');
   const panorama = stage.querySelector('.city-painted-world');
 
-  function loadPanorama(decodeForOpening) {
+  // Start optional downloads after the first street view can be shown. A
+  // visitor can always leave the opening before these requests finish.
+  const warmListeners = new AbortController();
+  let warmQueued = false;
+  function scheduleStreetWarmup() {
+    const root = document.documentElement;
+    const connection = navigator.connection;
+    function canWarm() {
+      return !document.hidden && !reducedMotion.matches && !connection?.saveData &&
+        !/^(slow-)?2g$/.test(connection?.effectiveType) && stage.hasAttribute('data-panorama-ready') &&
+        root.dataset.streetOpening !== 'loading' && !rail.hasAttribute('data-route-gliding') &&
+        !stage.hasAttribute('data-street-paused');
+    }
+    if (warmQueued || warmListeners.signal.aborted || !canWarm()) return;
+    warmQueued = true;
+    function warm() {
+      warmQueued = false;
+      if (!canWarm()) return;
+      warmListeners.abort();
+      warmState.disconnect();
+      root.setAttribute('data-street-warm', '');
+      document.dispatchEvent(new Event('street-art-warm'));
+      for (const loaf of rail.querySelectorAll('.market-tray img[loading="lazy"]')) {
+        loaf.fetchPriority = 'low';
+        loaf.loading = 'eager';
+      }
+    }
+    if (window.requestIdleCallback) requestIdleCallback(warm, {timeout:250});
+    else setTimeout(warm, 32);
+  }
+  const warmState = new MutationObserver(scheduleStreetWarmup);
+  warmState.observe(rail, {attributes:true, attributeFilter:['data-route-gliding']});
+  warmState.observe(stage, {attributes:true, attributeFilter:['data-street-paused', 'data-panorama-ready']});
+  const warmOptions = {signal:warmListeners.signal};
+  document.addEventListener('visibilitychange', scheduleStreetWarmup, warmOptions);
+  reducedMotion.addEventListener('change', scheduleStreetWarmup, warmOptions);
+  navigator.connection?.addEventListener('change', scheduleStreetWarmup, warmOptions);
+  document.addEventListener('street-opening-end', scheduleStreetWarmup, warmOptions);
+  window.addEventListener('load', scheduleStreetWarmup, warmOptions);
+
+  function loadPanorama() {
     return new Promise(resolve => {
       let fallbacks;
+      let decoding;
       function trySmallerImage() {
+        stage.removeAttribute('data-panorama-ready');
         if (!fallbacks) {
           // The markup lists candidates from smallest to largest. Only retry
           // below the failed resolution and retain normal srcset on success.
@@ -443,7 +518,6 @@
             new URL(candidate.trim().split(/\s+/)[0], document.baseURI).href);
           const selected = candidates.indexOf(panorama.currentSrc || panorama.src);
           fallbacks = (selected < 0 ? candidates : candidates.slice(0, selected)).reverse();
-          fallbacks.push('assets/street-overview.webp');
         }
         const next = fallbacks.shift();
         if (next) {
@@ -455,35 +529,38 @@
         stage.hidden = true;
         panorama.removeEventListener('error', failed);
         panorama.removeEventListener('load', loaded);
-        resolve(null);
+        resolve(false);
       }
       function failed() {
         if (panorama.complete && !panorama.naturalWidth) trySmallerImage();
       }
-      function ready() {
-        panorama.removeEventListener('load', loaded);
-        resolve(panorama);
-      }
-      function loaded() {
-        const candidate = panorama.currentSrc;
-        // An ordinary responsive source change can abort a pending decode.
-        // Let its replacement load instead of retrying the obsolete candidate.
-        panorama.decode().then(ready, () => {
-          if (panorama.complete && panorama.naturalWidth && panorama.currentSrc === candidate) trySmallerImage();
-        });
+      async function loaded() {
+        const candidate = panorama.currentSrc || panorama.src;
+        if (decoding === candidate) return;
+        decoding = candidate;
+        try {
+          if (panorama.decode) await panorama.decode();
+          if (panorama.complete && panorama.naturalWidth && candidate === (panorama.currentSrc || panorama.src)) {
+            stage.setAttribute('data-panorama-ready', '');
+            resolve(true);
+          }
+        } catch {
+          // A replacement selected after resize handles its own load event.
+          if (panorama.complete && candidate === (panorama.currentSrc || panorama.src)) trySmallerImage();
+        } finally {
+          if (decoding === candidate) decoding = null;
+        }
       }
       panorama.addEventListener('error', failed);
-      if (decodeForOpening && panorama.decode) {
-        panorama.addEventListener('load', loaded);
-        if (panorama.complete && panorama.naturalWidth) loaded();
-      } else {
-        resolve(panorama);
+      panorama.addEventListener('load', loaded);
+      if (panorama.complete) {
+        if (panorama.naturalWidth) loaded();
+        else failed();
       }
-      failed();
     });
   }
 
-  function playOpening(sharp) {
+  function playOpening(panoramaReady) {
     const root = document.documentElement;
     const banner = stage.querySelector('.needle-banner');
     const view = rail.getBoundingClientRect();
@@ -515,7 +592,7 @@
     }
     function finish(interrupted = true) {
       if (signal.aborted) return;
-      controls.abort(Boolean(interrupted));
+      controls.abort();
       clearTimeout(deadline);
       if (interrupted) finishArrival(stops[0]);
       releaseGreeting();
@@ -546,39 +623,16 @@
     document.addEventListener('visibilitychange', finish, {signal});
     reducedMotion.addEventListener('change', finish, {signal});
 
-    if (!panorama.decode) {
-      finish();
-      return;
-    }
-    const preview = stage.querySelector('.opening-preview');
-    // A cached image's load event can precede decode. Start the clock with a
-    // drawable building behind the cloth, whichever image is ready first.
-    Promise.any([sharp, preview.decode().then(() => preview)]).then(ready => {
+    // The same responsive painting stays behind the flag for the entire move.
+    panoramaReady.then(ready => {
       if (signal.aborted) return;
       if (!ready) return finish();
-      if (ready === preview) {
-        stage.classList.add('opening-facades');
-        const earlyFadeDeadline = performance.now() + 500;
-        const settled = new Promise(resolve => signal.addEventListener('abort', resolve, {once:true}));
-        sharp.then(async image => {
-          // Swap detail while the camera is still, or after it comes to rest.
-          if (image) {
-            if (performance.now() >= earlyFadeDeadline) await settled;
-            if (signal.reason !== true && !document.hidden && !reducedMotion.matches && panorama.animate) {
-              const fade = panorama.animate([{opacity:0}, {opacity:1}], {duration:240, easing:'ease-out'});
-              await fade.finished.catch(() => {});
-            }
-          } else {
-            finish();
-          }
-          stage.classList.remove('opening-facades');
-        });
-      }
       root.dataset.streetOpening = 'flag';
+      scheduleStreetWarmup();
       clearTimeout(deadline);
       // animationend normally releases the street; recover if CSS is interrupted.
       deadline = setTimeout(() => finish(false), 4000);
-    }, () => finish());
+    });
   }
 
   document.documentElement.setAttribute('data-street-navigation-ready', '');
@@ -587,10 +641,11 @@
   const initial = routeIndex(location.hash);
   openingHoldsGreeting = initial === 0 && document.documentElement.hasAttribute('data-opening-pending') &&
       !reducedMotion.matches && !document.hidden;
-  const firstPaint = loadPanorama(openingHoldsGreeting);
+  const firstPaint = loadPanorama();
   navigate(initial < 0 ? 0 : initial, {instant:true});
   if (openingHoldsGreeting) playOpening(firstPaint);
   document.documentElement.removeAttribute('data-opening-pending');
+  if (document.readyState === 'complete') scheduleStreetWarmup();
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(() => resize());
     observer.observe(rail);

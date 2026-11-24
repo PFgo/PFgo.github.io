@@ -302,7 +302,7 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   width: calc(4 * var(--block-width)); pointer-events: none; --walk-baseline: 1.5%;
 }
 .city-painted-world { display: block; width: 100%; height: 100%; max-width: none; }
-#market-clock, .city-painted-world, .opening-preview, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
+#market-clock, .city-painted-world, .city-stage :is(.street-tree, .harbor-wheel img, .harbor-wheel canvas:not(.wheel-lights), .drumheller-water, .campus-conversation, .harbor-air img, .street-lane svg) {
   filter: brightness(var(--street-light, 1)) saturate(var(--street-saturation, 1));
 }
 /* The light maps register to the original 8400 × 724 painting, including its mobile stretch. */
@@ -332,26 +332,10 @@ html:has(.street-page) { scroll-behavior: auto; scroll-padding: 0; }
   opacity: var(--market-neon, 0);
 }
 [data-street-lit] .market-neon { background-image: url("assets/pike-market-neon.webp"); }
-/* Either image supplies a registered ground for all four stops. */
-[data-street-navigation-ready] .opening-preview:not([data-painted]) + .city-painted-world:not([data-painted]) ~ *,
-[data-street-opening] .opening-facades > .city-painted-world ~ :not(.needle-banner),
-[data-street-navigation-ready] .opening-facades > .city-painted-world { opacity: 0; }
-.opening-preview:not([data-painted]) + .city-painted-world:not([data-painted]) ~ :is(.street-window-lights, .market-neon, .space-needle-lights),
-[data-street-opening] .opening-facades :is(.street-window-lights, .market-neon, .space-needle-lights) { visibility: hidden; }
-.city-stage > .opening-preview {
-  position: absolute;
-  inset: auto auto 0 0;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  z-index: -1;
-  visibility: hidden;
-}
-.opening-preview[data-painted]:has(+ .city-painted-world:not([data-painted])),
-.opening-facades > .opening-preview[data-painted] {
-  visibility: visible;
-}
-html[data-street-opening="loading"] .city-stage { visibility: hidden; }
+/* Reveal the painting, its flag and its lights as a single frame. A child
+   with its own visibility rule cannot expose an overlay while the image decodes. */
+[data-street-navigation-ready] .city-stage:not([data-panorama-ready]),
+html[data-street-opening="loading"] .city-stage { opacity: 0; }
 html[data-street-opening="loading"] :is(.city-stage, #about h1, #about .hero-ctas, .tour-header, .route-footer, #street-motion) {
   animation-play-state: paused;
 }

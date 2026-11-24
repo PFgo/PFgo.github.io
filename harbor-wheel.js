@@ -11,6 +11,7 @@
   let context, lampContext;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const stage = wheel.closest('.city-stage');
+  const rail = wheel.closest('#street-rail');
   const period = 122000;
   const count = 28;
   const tau = Math.PI * 2;
@@ -20,13 +21,30 @@
   let phase = 0, request = 0, timer = 0, previous = 0;
   const loading = new Set();
   const materials = {};
+  const rotorParts = ['cabin', 'spoke', 'foreground'];
   const rings = new Map();
-  function haveMaterials(names) {
+  function haveMaterials(names, warm = false) {
     for (const name of names) {
       if (materials[name] || loading.has(name)) continue;
       loading.add(name);
       const image = new Image();
-      image.onload = () => { materials[name] = image; loading.delete(name); sync(); };
+      if (warm) image.fetchPriority = 'low';
+      image.decoding = 'async';
+      image.onload = () => {
+        materials[name] = image;
+        loading.delete(name);
+        if (warm && wheel.hasAttribute('data-out-of-view')) {
+          const prepare = () => {
+            if (!document.hidden && !reduced.matches && !rail?.hasAttribute('data-route-gliding')) {
+              image.decode?.().catch(() => {});
+            }
+          };
+          if (document.documentElement.hasAttribute('data-street-opening')) {
+            document.addEventListener('street-opening-end', prepare, {once:true});
+          } else prepare();
+        }
+        sync();
+      };
       image.onerror = () => loading.delete(name);
       image.src = new URL('wheel-' + name + '.webp', base);
     }
@@ -136,7 +154,8 @@
   }
   function active() {
     return !document.hidden && !reduced.matches &&
-      !stage?.hasAttribute('data-street-paused') && !wheel.hasAttribute('data-out-of-view');
+      !stage?.hasAttribute('data-street-paused') && !wheel.hasAttribute('data-out-of-view') &&
+      !rail?.hasAttribute('data-route-gliding');
   }
   function tick(time) {
     request = 0;
@@ -155,11 +174,11 @@
   }
   function sync() {
     stop();
-    if (document.hidden || wheel.hasAttribute('data-out-of-view')) return;
+    if (document.hidden || wheel.hasAttribute('data-out-of-view') || rail?.hasAttribute('data-route-gliding')) return;
     const moving = active();
     const lit = document.body.hasAttribute('data-street-lit');
     if (!lit) lamps.hidden = true;
-    const showRotor = (moving || !canvas.hidden) && haveMaterials(['cabin','spoke','foreground']);
+    const showRotor = (moving || !canvas.hidden) && haveMaterials(rotorParts);
     const showLights = lit && haveMaterials(['foreground']);
     if (!showRotor && !showLights) return;
     const bounds = wheel.getBoundingClientRect();
@@ -191,6 +210,7 @@
   poster?.addEventListener('load', sync, {once:true});
   const observer=new MutationObserver(sync);
   if (stage) observer.observe(stage,{attributes:true,attributeFilter:['data-street-paused']});
+  if (rail) observer.observe(rail,{attributes:true,attributeFilter:['data-route-gliding']});
   observer.observe(wheel,{attributes:true,attributeFilter:['data-out-of-view']});
   observer.observe(document.body,{attributes:true,attributeFilter:['data-street-lit']});
   reduced.addEventListener('change',sync);
@@ -199,5 +219,10 @@
   else window.addEventListener('resize', sync);
   window.addEventListener('pagehide',stop);
   window.addEventListener('pageshow',sync);
+  const warmWheel = () => {
+    if (!reduced.matches) haveMaterials(rotorParts, true);
+  };
+  if (document.documentElement.hasAttribute('data-street-warm')) warmWheel();
+  else document.addEventListener('street-art-warm', warmWheel, {once:true});
   sync();
 })();
