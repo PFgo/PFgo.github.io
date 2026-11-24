@@ -465,6 +465,38 @@
   const stage = rail.querySelector('.city-stage');
   const panorama = stage.querySelector('.city-painted-world');
 
+  async function decodeLayer(image) {
+    try {
+      if (image.dataset.lightSrc) image.src = image.dataset.lightSrc;
+      if (image.decode) await image.decode();
+      else if (!image.complete) {
+        await new Promise((resolve, reject) => {
+          image.addEventListener('load', resolve, {once:true});
+          image.addEventListener('error', reject, {once:true});
+        });
+      }
+      if (image.dataset.lightSrc) image.hidden = !image.naturalWidth;
+    } catch {
+      image.hidden = true;
+    }
+  }
+  const wheelReady = decodeLayer(stage.querySelector('.harbor-wheel img'));
+
+  let lightsReady;
+  function prepareNightLights() {
+    if (!document.body.hasAttribute('data-street-lit')) return;
+    if (lightsReady) return lightsReady;
+    lightClock.disconnect();
+    const maps = Array.from(stage.querySelectorAll('[data-light-src]'), decodeLayer);
+    lightsReady = Promise.all(maps).then(() => {
+      stage.setAttribute('data-lights-ready', '');
+    });
+    return lightsReady;
+  }
+  const lightClock = new MutationObserver(prepareNightLights);
+  lightClock.observe(document.body, {attributes:true, attributeFilter:['data-street-lit']});
+  prepareNightLights();
+
   // Start optional downloads after the first street view can be shown. A
   // visitor can always leave the opening before these requests finish.
   const warmListeners = new AbortController();
@@ -540,6 +572,10 @@
         decoding = candidate;
         try {
           if (panorama.decode) await panorama.decode();
+          if (!stage.hasAttribute('data-panorama-ready')) {
+            await wheelReady;
+            await prepareNightLights();
+          }
           if (panorama.complete && panorama.naturalWidth && candidate === (panorama.currentSrc || panorama.src)) {
             stage.setAttribute('data-panorama-ready', '');
             resolve(true);
@@ -572,16 +608,20 @@
       return;
     }
 
-    // Frame the cloth using its position in the responsive street scene.
+    // Fit the flag and the painted curb in the rail before starting the pullback.
+    // Centering the flag vertically can put storefronts below the fold on desktop.
     const narrow = matchMedia('(max-width: 700px)').matches;
-    const scale = Math.min(narrow ? 1.85 : 2.15, .76 * view.width / flag.width);
+    const scale = Math.min(narrow ? 1.85 : 2.15, .76 * view.width / flag.width,
+      .84 * view.height / (street.bottom - flag.top));
+    if (scale <= 1) {
+      openingHoldsGreeting = false;
+      paint();
+      return;
+    }
     const focusX = flag.left + flag.width / 2 - street.left;
-    const focusY = flag.top + flag.height / 2 - street.top;
     const targetX = view.left + view.width * .5 - street.left - scale * focusX;
-    const targetY = view.top + view.height * (narrow ? .44 : .38) - street.top - scale * focusY;
-    // Keep the painted pavement under the foreground, including on tall phones.
     const x = Math.max(view.right - street.left - scale * street.width, Math.min(view.left - street.left, targetX));
-    const y = Math.max(view.bottom - street.top - scale * street.height, targetY);
+    const y = view.bottom - street.top - scale * street.height;
     stage.style.setProperty('--flag-framing', `translate3d(${x}px, ${y}px, 0) scale(${scale})`);
     const controls = new AbortController();
     const {signal} = controls;

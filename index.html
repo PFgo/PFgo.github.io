@@ -6,6 +6,12 @@
   <meta name="description" content="Dave Guo’s portfolio, projects, and education in Seattle.">
   <title>Dave Guo</title>
   <script>
+    // Text can use the static layout while deferred scripts are loading. Keep
+    // the street in reserve until its artwork can be revealed together.
+    document.documentElement.setAttribute('data-street-booting', '');
+    document.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.removeAttribute('data-street-booting');
+    }, {once:true});
     // Reserve the headings before first paint while their ink and font load.
     if (!document.hidden && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
       document.documentElement.setAttribute('data-pen-pending', '');
@@ -30,12 +36,12 @@
   <link rel="preload" href="assets/patrick-hand.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="home.css?v=7d5d79535d">
-  <link rel="stylesheet" href="tour.css?v=e3c6aa0bda">
+  <link rel="stylesheet" href="tour.css?v=3b0d7cb077">
   <link rel="stylesheet" href="market-stop.css?v=20efc66c5b">
   <link rel="stylesheet" href="landmarks.css?v=3484fa590b">
   <link rel="stylesheet" href="heading-ink.css?v=046c2a5dd3">
   <noscript><style>.street-tree { background: url("assets/tree-cherry.webp") center / 100% 100% no-repeat; }</style></noscript>
-  <script defer src="street-navigation.js?v=ac94be5d07"></script>
+  <script defer src="street-navigation.js?v=34d3a4494a"></script>
   <script defer src="street-art.js?v=1707b85147"></script>
   <script defer src="home.js?v=861ed036b7"></script>
   <script defer src="harbor-wheel.js?v=0d942bb506"></script>
@@ -185,9 +191,10 @@
   <main id="street-rail" tabindex="-1" aria-label="Dave’s Seattle street">
     <div class="street-world">
       <div class="seattle-stage city-stage" role="img" aria-label="An illustrated Seattle street. A flag on the Space Needle reads “Open to work”. Walk past Pike Place Market, Suzzallo Library and Drumheller Fountain to the Great Wheel and ferry on Elliott Bay.">
-        <img class="city-painted-world" src="assets/seattle-promenade.webp?v=landmark-motion01" srcset="assets/seattle-promenade-small.webp?v=landmark-motion01 4200w, assets/seattle-promenade-medium.webp?v=landmark-motion01 5040w, assets/seattle-promenade.webp?v=landmark-motion01 8400w" sizes="(scripting: none) 100vw, (max-width: 700px) and (orientation: portrait) min(400.71vw, 346.56dvh), (max-width: 700px) and (max-height: 430px) max(277.97vw, min(465.69vw, 346.56dvh)), (max-width: 700px) min(465.69vw, 346.56dvh), max(259.92vw, min(346.56vw, 519.84dvh))" alt="" width="8400" height="724" decoding="async" fetchpriority="high">
-        <span class="street-window-lights" aria-hidden="true"></span>
-        <span class="market-neon" aria-hidden="true"></span>
+        <!-- Decode display-critical layers off the main paint first, then paint them synchronously. -->
+        <img class="city-painted-world" src="assets/seattle-promenade.webp?v=landmark-motion01" srcset="assets/seattle-promenade-small.webp?v=landmark-motion01 4200w, assets/seattle-promenade-medium.webp?v=landmark-motion01 5040w, assets/seattle-promenade.webp?v=landmark-motion01 8400w" sizes="(scripting: none) 100vw, (max-width: 700px) and (orientation: portrait) min(400.71vw, 346.56dvh), (max-width: 700px) and (max-height: 430px) max(277.97vw, min(465.69vw, 346.56dvh)), (max-width: 700px) min(465.69vw, 346.56dvh), max(259.92vw, min(346.56vw, 519.84dvh))" alt="" width="8400" height="724" decoding="sync" fetchpriority="high">
+        <img class="street-window-lights" data-light-src="assets/street-window-lights.webp" alt="" decoding="sync" hidden>
+        <img class="market-neon" data-light-src="assets/pike-market-neon.webp" alt="" decoding="sync" hidden>
         <svg class="needle-banner" data-landmark aria-hidden="true" focusable="false" viewBox="0 0 210 74">
           <defs>
             <linearGradient id="sailcloth" x1="0" y1="0" x2=".46" y2="0" spreadMethod="reflect">
@@ -325,7 +332,7 @@
             </g>
           </g>
         </svg>
-        <span class="space-needle-lights" aria-hidden="true"></span>
+        <img class="space-needle-lights" data-light-src="assets/space-needle-lights.webp" alt="" decoding="sync" hidden>
         <svg id="market-clock" viewBox="-110 -110 220 220" preserveAspectRatio="none" aria-hidden="true" focusable="false">
           <image href="assets/market-clock-paper.webp" x="-109.5" y="-109.5" width="220" height="220" onload="this.parentNode.setAttribute('data-dial-ready', '')"/>
           <defs>
@@ -349,7 +356,7 @@
         </svg>
         <canvas class="drumheller-water" width="314" height="208" data-landmark aria-hidden="true"></canvas>
         <div class="harbor-wheel" data-street-art data-landmark aria-hidden="true">
-          <noscript><img src="assets/wheel-poster.webp" width="450" height="475" decoding="async" alt=""></noscript>
+          <img src="assets/wheel-poster.webp" width="450" height="475" decoding="sync" alt="">
           <canvas width="675" height="713" hidden></canvas>
         </div>
         <svg class="street-tree" data-street-art data-landmark aria-hidden="true" focusable="false" viewBox="0 0 616 516" preserveAspectRatio="none" style="left:45.7142857%;top:24.3093923%;width:7.3333333%;height:71.2707182%">
