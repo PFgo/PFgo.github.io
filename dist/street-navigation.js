@@ -23,6 +23,8 @@
   let offsets = [];
   let current = -1;
   let openingHoldsGreeting = false;
+  // Set while the opening plays: lets a route trip finish the camera move first.
+  let openingHurry = null;
   let destination = null;
   let routeFrame = 0;
   // A native smooth scroll toward `destination` is in progress (see touchPhone).
@@ -267,6 +269,10 @@
 
   function navigate(index, {instant = false, push = false, focus = false, hash} = {}) {
     if (index < 0 || index >= stops.length) return;
+    if (openingHurry && !instant) {
+      openingHurry(() => navigate(index, {push, focus, hash}));
+      return;
+    }
     endResize();
     cancelWheel();
     cancelRoute();
@@ -633,6 +639,19 @@
     });
   }
 
+  // Input that the click and keydown handlers turn into a route trip.
+  function startsTrip(event) {
+    if (event.type === 'keydown') {
+      return !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey &&
+        ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key);
+    }
+    if (event.type !== 'click' && event.type !== 'focusin') return false;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('button[data-step]')) return true;
+    const link = target?.closest('a[href^="#"]');
+    return Boolean(link) && routeIndex(link.hash) >= 0;
+  }
+
   function playOpening(panoramaReady, firstFrameDeadline) {
     const root = document.documentElement;
     const banner = stage.querySelector('.needle-banner');
@@ -667,15 +686,41 @@
       openingHoldsGreeting = false;
       if (!frame) frame = requestAnimationFrame(paint);
     }
+    // A trip chosen during the opening (nav link, step button, arrow key) would
+    // otherwise cut the close-up and jump the camera. Instead the rest of the
+    // opening plays out quickly, and the trip sets off from About when it ends.
+    let queuedTrip = null;
+    const openingAnimations = new Set(['needle-pullback', 'opening-greeting', 'opening-copy', 'opening-controls']);
+    openingHurry = trip => {
+      queuedTrip = trip;
+      const camera = stage.getAnimations().find(animation => animation.animationName === 'needle-pullback');
+      if (root.dataset.streetOpening !== 'flag' || !camera) {
+        // Nothing is on screen yet, so there is no move to finish.
+        queuedTrip = null;
+        finish();
+        trip();
+        return;
+      }
+      const {delay = 0, duration = 0} = camera.effect.getComputedTiming();
+      const rate = Math.max(1, (delay + duration - camera.currentTime) / 320);
+      for (const animation of document.getAnimations()) {
+        if (openingAnimations.has(animation.animationName)) animation.updatePlaybackRate(rate);
+      }
+    };
     function finish(interrupted = true) {
       if (signal.aborted) return;
       controls.abort();
       clearTimeout(deadline);
+      openingHurry = null;
+      // Another gesture (a wheel, a swipe) takes over from a queued trip.
+      const trip = interrupted ? null : queuedTrip;
+      queuedTrip = null;
       if (interrupted) finishArrival(stops[0]);
       releaseGreeting();
       delete root.dataset.streetOpening;
       stage.style.removeProperty('--flag-framing');
       document.dispatchEvent(new Event('street-opening-end'));
+      trip?.();
     }
     root.dataset.streetOpening = 'loading';
     // Share the first-frame budget with the document bootstrap, including on a cold load.
@@ -686,8 +731,10 @@
     stage.addEventListener('animationend', event => {
       if (event.target === stage && event.animationName === 'needle-pullback') finish(false);
     }, {signal});
+    // Route controls hurry the camera through openingHurry instead of cutting it.
+    const interrupt = event => { if (!startsTrip(event)) finish(); };
     for (const type of ['wheel','touchmove','keydown','click','focusin']) {
-      document.addEventListener(type, finish, {capture:true, passive:true, signal});
+      document.addEventListener(type, interrupt, {capture:true, passive:true, signal});
     }
     for (const type of ['hashchange','popstate','pagehide']) {
       window.addEventListener(type, finish, {signal});
